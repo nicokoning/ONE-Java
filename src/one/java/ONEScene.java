@@ -99,7 +99,7 @@ public class ONEScene extends ONEObject
         if (index >= 0)
         {
             ONEVolume currentVolume = volumes.get(index);
-            currentVolume.copy(v);
+            currentVolume.copyHeader(v);
         }
         else
         {
@@ -115,7 +115,7 @@ public class ONEScene extends ONEObject
         if (index >= 0)
         {
             ONETexture currentTexture = textures.get(index);
-            currentTexture.copy(t);
+            currentTexture.copyHeader(t);
         }
         else
         {
@@ -191,7 +191,7 @@ public class ONEScene extends ONEObject
      */
     public ArrayList<ONEVolume> getVolumes(ONETexture t)
     {
-        ArrayList<ONEVolume> volumes = new ArrayList<>();
+        ArrayList<ONEVolume> mappedVolumes = new ArrayList<>();
         for (int i = 0; i < volumes.size(); i++)
         {
             ONEVolume volume = volumes.get(i);
@@ -200,13 +200,13 @@ public class ONEScene extends ONEObject
             {
                 if (tIds[j] == t.getID())
                 {
-                    volumes.add(volume);
+                    mappedVolumes.add(volume);
                     break;
                 }
             }
         }
 
-        return (volumes);
+        return (mappedVolumes);
     }
 
     /**
@@ -214,7 +214,7 @@ public class ONEScene extends ONEObject
      */
     public ArrayList<ONETexture> getTextures(ONEVolume v)
     {
-        ArrayList<ONETexture> textures = new ArrayList<>();
+        ArrayList<ONETexture> mappedTextures = new ArrayList<>();
 
         long[] tIds = v.getTextureIDs();
         for (int i = 0; i < tIds.length; i++)
@@ -222,11 +222,11 @@ public class ONEScene extends ONEObject
             ONETexture tex = this.getTexture(tIds[i]);
             if (tex != null)
             {
-                textures.add(tex);
+                mappedTextures.add(tex);
             }
         }
 
-        return (textures);
+        return (mappedTextures);
     }
 
     //--------------------------------------------------------------------------

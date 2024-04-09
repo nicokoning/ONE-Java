@@ -4,6 +4,8 @@
  */
 package one.java;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -22,27 +24,40 @@ public abstract class ONEObject implements Serializable
     private String name = "";
     //A list of parameters for this object
     private ArrayList<ONEParameter> parameters = new ArrayList<>();
+    //For property change notifications
+    private PropertyChangeSupport support;
 
     public ONEObject()
     {
         ID = System.nanoTime();
+        support = new PropertyChangeSupport(this);
     }
-    
-    /**
-     * Copies the info from the object to this object
-     * @param object 
-     */
-    public void copy(ONEObject object)
+
+    public void addPropertyChangeListener(PropertyChangeListener pcl)
     {
-        this.name = object.name;
+        support.addPropertyChangeListener(pcl);
+    }
+
+    public void removePropertyChangeListener(PropertyChangeListener pcl)
+    {
+        support.removePropertyChangeListener(pcl);
+    }
+
+    /**
+     * Copies the header info from the object to this object
+     *
+     * @param object
+     */
+    public void copyHeader(ONEObject object)
+    {
+        this.setName(object.getName());
         this.parameters.clear();
-        for(int i = 0; i < object.getParameters().size(); i++)
+        for (int i = 0; i < object.getParameters().size(); i++)
         {
             ONEParameter param = object.getParameters().get(i);
             this.setParameter(param.key, param.value);
-        }        
+        }
     }
-            
 
     /**
      * Returns true if the ID of the given object matches our ID
@@ -82,7 +97,9 @@ public abstract class ONEObject implements Serializable
      */
     public void setName(String s)
     {
+        String oldValue = this.name;
         this.name = s;
+        this.support.firePropertyChange("name", oldValue, this.name);
     }
 
     /**
@@ -98,7 +115,10 @@ public abstract class ONEObject implements Serializable
      */
     public void setID(long ID)
     {
+        long oldID = this.ID;
         this.ID = ID;
+        this.support.firePropertyChange("id", oldID, this.ID);
+        
     }
 
     /**
@@ -134,6 +154,8 @@ public abstract class ONEObject implements Serializable
             //Add the new one
             getParameters().add(searchParam);
         }
+
+        this.support.firePropertyChange(key, null, value);
     }
 
     /**
@@ -149,6 +171,8 @@ public abstract class ONEObject implements Serializable
                 this.parameters.remove(i--);
             }
         }
+
+        this.support.firePropertyChange(key, null, null);
     }
 
     /**
@@ -197,8 +221,8 @@ public abstract class ONEObject implements Serializable
      * Returns a integer representation of the value for the given key
      *
      * @param key
-     * @return the integer representation of the value for the key, or 0 if
-     * not found or the value is not the right type.
+     * @return the integer representation of the value for the key, or 0 if not
+     * found or the value is not the right type.
      */
     public Integer getIntParameter(String key)
     {
@@ -237,8 +261,8 @@ public abstract class ONEObject implements Serializable
      * Returns a double representation of the value for the given key
      *
      * @param key
-     * @return the double representation of the value for the key, or 0 if
-     * not found or the value is not the right type.
+     * @return the double representation of the value for the key, or 0 if not
+     * found or the value is not the right type.
      */
     public Double getDoubleParameter(String key)
     {

@@ -41,6 +41,14 @@ public class ONETexture extends ONEObject
     {
         this.setType(ONE_TEXTURE_TYPE.RGBA_BYTE);
     } //end of constructor
+    
+    /**
+     * Returns true if there are no voxels in this texture
+     */ 
+    public boolean isEmpty()
+    {
+        return(this.voxelList.isEmpty());
+    }
 
     /**
      * Clears all the voxel data
