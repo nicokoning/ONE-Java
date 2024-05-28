@@ -71,14 +71,24 @@ public class ONEFileReader
      */
     private void readData(ONEScene scene, String filename) throws Exception
     {
-        BufferedInputStream stream = new BufferedInputStream(new FileInputStream(filename));
-        for (int i = 0; i < scene.getTextures().size(); i++)
+        BufferedInputStream stream = null;
+        try
         {
-            ONETexture texture = scene.getTextures().get(i);
-            this.readData(texture, false, stream);
+            stream = new BufferedInputStream(new FileInputStream(filename));
+            for (int i = 0; i < scene.getTextures().size(); i++)
+            {
+                ONETexture texture = scene.getTextures().get(i);
+                this.readData(texture, false, stream);
+            }
+        }
+        finally
+        {
+            if (stream != null)
+            {
+                stream.close();
+            }
         }
 
-        stream.close();
     }
 
     /**
@@ -119,7 +129,7 @@ public class ONEFileReader
         long textureID = ONEByteReader.nextLong(stream);
         if (textureID != texture.getID())
         {
-            throw new Exception("Texture ID of data ("+textureID+") does not match texture ID of object to read ("+texture.getID()+").");
+            throw new Exception("Texture ID of data (" + textureID + ") does not match texture ID of object to read (" + texture.getID() + ").");
         }
 
         //Number of voxels to read
@@ -127,7 +137,7 @@ public class ONEFileReader
         //The size of each voxel in bytes
         int voxelByteSize = texture.newVoxel().sizeInBytes();
         //How many bytes do we have to read to get all the voxel data?
-        long bytesToRead = numVoxels * voxelByteSize;
+        long bytesToRead = (long)numVoxels * (long)voxelByteSize;
 
         //If we want to skip this texture, just leave, we are at the right place
         if (skip)
@@ -137,7 +147,7 @@ public class ONEFileReader
         }
 
         //how many voxels to read at a time?
-        int dVoxel = 10000;
+        int dVoxel = 1000000;
         int bufferSize = dVoxel * voxelByteSize;
         byte[] buffer = new byte[bufferSize];
 
@@ -154,9 +164,9 @@ public class ONEFileReader
         while (bytesRead < bytesToRead)
         {
             //Figure out how many bytes we should read, make sure we don't read too many
-            long readLength = Math.min(bufferSize, bytesToRead-bytesRead);
+            long readLength = Math.min(bufferSize, bytesToRead - bytesRead);
             //Read the bytes
-            long read = stream.read(buffer, 0, (int)readLength);
+            long read = stream.read(buffer, 0, (int) readLength);
             //How many voxels did we just read in?
             int readVoxels = (int) (read / voxelByteSize);
             //Increment our read bytes
