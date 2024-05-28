@@ -17,6 +17,22 @@ public class ONEVolume extends ONEObject
     public ONEVolume()
     {
     } //end of constructor
+    
+    /**
+     * Removes obsolete parameters, adds new required ones etc
+     */
+    public void clean()
+    {        
+        super.clean();
+        
+        //Convert from the old scale to the new ones
+        double scale = this.getDoubleParameter("SCALE");
+        if(scale > 0)
+        {
+            this.setScales(scale, scale, scale);
+            this.removeParameter("SCALE");
+        }
+    }
 
     /**
      * Sets the emission parameter
@@ -86,22 +102,6 @@ public class ONEVolume extends ONEObject
     }
 
     /**
-     * @return the scale parameter value
-     */
-    public double getScale()
-    {
-        return (this.getDoubleParameter("SCALE"));
-    }
-
-    /**
-     * @param scale the scale to set
-     */
-    public void setScale(double scale)
-    {
-        this.setParameter("SCALE", Double.toString(scale));
-    }
-
-    /**
      * Sets the offsets for this volume
      * @param x the x offset
      * @param y the y offset
@@ -154,6 +154,32 @@ public class ONEVolume extends ONEObject
 
         return (offsets);
     }
+    
+     /**
+     * Sets the volume scales
+     */
+    public void setScales(double x, double y, double z)
+    {
+        this.setParameter("SCALE_X", "" + x);
+        this.setParameter("SCALE_Y", "" + y);
+        this.setParameter("SCALE_Z", "" + z);
+    }
+
+    /**
+     * Returns an array of scale values for this volume (x,y,z -> 0,1,2)
+     * @return 
+     */
+    public double[] getScales()
+    {
+        double[] scales = new double[3];
+        scales[0] = this.getDoubleParameter("SCALE_X");
+        scales[1] = this.getDoubleParameter("SCALE_Y");
+        scales[2] = this.getDoubleParameter("SCALE_Z");
+
+        return (scales);
+    }
+    
+    
 
     /**
      * Clears all of the texture IDs that are mapped to this volume

@@ -9,6 +9,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedList;
 import one.java.ONEParameter;
 import one.java.ONEScene;
 import static one.java.ONEScene.ONE_ID;
@@ -30,7 +33,6 @@ public class ONEFileReader
     {
     } //end of constructor
 
-
     /**
      * Reads the entire file and returns the scene
      */
@@ -45,9 +47,10 @@ public class ONEFileReader
 
     /**
      * Read the contents of the file into the one scene provided
+     *
      * @param scene
      * @param filename
-     * @throws Exception 
+     * @throws Exception
      */
     public void read(ONEScene scene, String filename) throws Exception
     {
@@ -72,47 +75,124 @@ public class ONEFileReader
         for (int i = 0; i < scene.getTextures().size(); i++)
         {
             ONETexture texture = scene.getTextures().get(i);
-            this.readData(texture, stream);
+            this.readData(texture, false, stream);
         }
 
         stream.close();
     }
-    
-       /**
+
+    /**
      * Reads the data for the given texture from the input stream
      *
      * @param texture
      * @param stream
      */
-    private void readData(ONETexture texture, BufferedInputStream stream) throws Exception
+    public void readTexture(ONEScene scene, ONETexture texture, String filename) throws Exception
+    {
+        BufferedInputStream stream = new BufferedInputStream(new FileInputStream(filename));
+        for (int i = 0; i < scene.getTextures().size(); i++)
+        {
+            ONETexture sceneTexture = scene.getTextures().get(i);
+            //Skip any textures that we don't want
+            boolean skip = sceneTexture.getID() != texture.getID();
+
+            this.readData(sceneTexture, skip, stream);
+            //If this was the one we wanted, break.
+            if (!skip)
+            {
+                break;
+            }
+        }
+
+        stream.close();
+
+    }
+
+    /**
+     * Reads the data for the given texture from the input stream
+     *
+     * @param texture
+     * @param stream
+     */
+    private void readData(ONETexture texture, boolean skip, BufferedInputStream stream) throws Exception
     {
         long textureID = ONEByteReader.nextLong(stream);
         if (textureID != texture.getID())
         {
-            throw new Exception("Texture ID of data does not match texture ID of object to read.");
+            throw new Exception("Texture ID of data ("+textureID+") does not match texture ID of object to read ("+texture.getID()+").");
         }
 
         //Number of voxels to read
         int numVoxels = ONEByteReader.nextInt(stream);
         //The size of each voxel in bytes
         int voxelByteSize = texture.newVoxel().sizeInBytes();
+        //How many bytes do we have to read to get all the voxel data?
+        long bytesToRead = numVoxels * voxelByteSize;
 
-        //Read the voxels (THIS CAN BE SPED UP! use buffering)  
-        for (int i = 0; i < numVoxels; i++)
+        //If we want to skip this texture, just leave, we are at the right place
+        if (skip)
         {
-            //Create a new voxel
-            ONEVoxel voxel = texture.newVoxel();
-
-            //Read the next voxel from the stream
-            byte[] buffer = new byte[voxelByteSize];
-            stream.read(buffer);
-
-            ONEByteReader byteReader = new ONEByteReader(buffer);            
-            voxel.read(byteReader);
-
-            texture.getVoxels().add(voxel);
+            stream.skip(bytesToRead);
+            return;
         }
 
+        //how many voxels to read at a time?
+        int dVoxel = 10000;
+        int bufferSize = dVoxel * voxelByteSize;
+        byte[] buffer = new byte[bufferSize];
+
+        byte[] voxelBuffer = new byte[voxelByteSize];
+
+        ONEByteReader byteReader = new ONEByteReader();
+
+        //The list of voxels we add to
+        ArrayList<ONEVoxel> voxelList = texture.getVoxels();
+        //Grow the array here, once
+        voxelList.ensureCapacity(voxelList.size() + numVoxels);
+
+        long bytesRead = 0;
+        while (bytesRead < bytesToRead)
+        {
+            //Figure out how many bytes we should read, make sure we don't read too many
+            long readLength = Math.min(bufferSize, bytesToRead-bytesRead);
+            //Read the bytes
+            long read = stream.read(buffer, 0, (int)readLength);
+            //How many voxels did we just read in?
+            int readVoxels = (int) (read / voxelByteSize);
+            //Increment our read bytes
+            bytesRead += read;
+
+            //Add all of the read voxels to our list
+            for (int j = 0; j < readVoxels; j++)
+            {
+                ONEVoxel voxel = texture.newVoxel();
+                System.arraycopy(buffer, j * voxelByteSize, voxelBuffer, 0, voxelBuffer.length);
+                byteReader.setBytes(voxelBuffer);
+                voxel.read(byteReader);
+                voxelList.add(voxel);
+            }
+        }
+    }
+
+    /**
+     * Adds all of the values in the array to the list, starting at the
+     * startIndex of the array and ending at startIndex + length
+     */
+    private void addArrayToList(ArrayList<ONEVoxel> list, ONEVoxel[] array, int startIndex, int length)
+    {
+        //First expand the list size
+        list.ensureCapacity(list.size() + length);
+
+        int endIndex = startIndex + length;
+        for (int i = startIndex; i < endIndex; i++)
+        {
+            ONEVoxel v = array[i];
+            if (v == null)
+            {
+                continue;
+            }
+
+        }
     }
 
     /**
@@ -235,6 +315,7 @@ public class ONEFileReader
         volume.setName(raf.readUTF());
         volume.getParameters().clear();
         volume.getParameters().addAll(this.readParameters(raf));
+        volume.clean();
     }
 
     /**
@@ -249,8 +330,7 @@ public class ONEFileReader
         texture.setName(raf.readUTF());
         texture.getParameters().clear();
         texture.getParameters().addAll(this.readParameters(raf));
+        texture.clean();
     }
-
- 
 
 } //end of ONEFileReader class

@@ -87,11 +87,21 @@ public abstract class ONEVoxel<T extends Number>
 
         return (true);
     }
+    
+    /**
+     * How many bytes is each of the rgba data?
+     * @return 
+     */
+    public abstract int dataByteSize();
 
     /**
      * Returns the size of the voxel in bytes for storage and reading purposes
      */
-    public abstract int sizeInBytes();
+    public final int sizeInBytes()
+    {
+        int size = 3 * ONEByteReader.INT_SIZE + 4 * dataByteSize();
+        return (size);
+    }
 
     /**
      * Sets the voxel color

@@ -9,7 +9,6 @@ import one.java.io.ONEByteWriter;
  */
 public class ONEFloatVoxel extends ONEVoxel<Float>
 {
-
     //The serial version for deserializing
     private static final long serialVersionUID = 1L;
 
@@ -23,9 +22,9 @@ public class ONEFloatVoxel extends ONEVoxel<Float>
     }
 
     @Override
-    public int sizeInBytes()
+    public int dataByteSize()
     {
-        int size = 3 * ONEByteReader.INT_SIZE + 4 * ONEByteReader.FLOAT_SIZE;
+        int size = ONEByteReader.FLOAT_SIZE;
         return (size);
     }
 

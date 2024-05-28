@@ -23,9 +23,9 @@ public class ONEByteVoxel extends ONEVoxel<Byte>
     }
 
     @Override
-    public int sizeInBytes()
+    public int dataByteSize()
     {
-        int size = 3 * ONEByteReader.INT_SIZE + 4 * ONEByteReader.BYTE_SIZE;
+        int size = ONEByteReader.BYTE_SIZE;
         return (size);
     }
 

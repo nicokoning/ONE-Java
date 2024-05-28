@@ -15,17 +15,18 @@ import one.java.voxels.ONEVoxel;
  */
 public class ONETexture extends ONEObject
 {
+
     public enum ONE_TEXTURE_TYPE
     {
         RGBA_BYTE, RGBA_FLOAT
     }
 
     //The serial version for deserializing
-    private static final long serialVersionUID = 1L;    
-      
+    private static final long serialVersionUID = 1L;
+
     //List of non-zero voxels
     protected ArrayList<ONEVoxel> voxelList = new ArrayList<>();
-    
+
     /**
      * Creates a new ONETexture object of the given type
      */
@@ -33,40 +34,59 @@ public class ONETexture extends ONEObject
     {
         this.setType(type);
     } //end of constructor
-    
-     /**
-     * Creates a new ONETexture object, default to BYTE 
+
+    /**
+     * Creates a new ONETexture object, default to BYTE
      */
     public ONETexture()
     {
-        this.setType(ONE_TEXTURE_TYPE.RGBA_BYTE);
+        this(ONE_TEXTURE_TYPE.RGBA_BYTE);
     } //end of constructor
-    
+
+    /**
+     * Removes obsolete parameters, adds new required ones etc
+     */
+    public void clean()
+    {
+        super.clean();
+
+        //Check to see if this is an older version that used RESOLUTION
+        int res = this.getIntParameter("RESOLUTION");
+         this.removeParameter("RESOLUTION");
+        if (this.getWidth() == 0 && this.getHeight() == 0 && this.getDepth() == 0 && res != 0)
+        {
+            this.setSize(res, res, res);           
+        }
+    }
+
     /**
      * Returns true if there are no voxels in this texture
-     */ 
+     */
     public boolean isEmpty()
     {
-        return(this.voxelList.isEmpty());
+        return (this.voxelList.isEmpty());
     }
 
     /**
      * Clears all the voxel data
-     */ 
+     */
     public void clearData()
     {
         this.voxelList.clear();
     }
-    
+
     /**
      * Copies all the data from the given texture to this one.
-     * @param texture 
+     *
+     * @param texture
      */
     public void copyData(ONETexture texture)
     {
-        if(texture == null)
+        if (texture == null)
+        {
             return;
-        
+        }
+
         this.clearData();
         this.voxelList.addAll(texture.voxelList);
     }
@@ -106,11 +126,10 @@ public class ONETexture extends ONEObject
                 throw new Exception("Voxel type is unknown.");
         }
     }
-    
+
     //--------------------------------------------------------------------------
     // Getter and Setter methods
     //--------------------------------------------------------------------------
-   
     /**
      * @return the type
      */
@@ -126,7 +145,7 @@ public class ONETexture extends ONEObject
     {
         return voxelList;
     }
-    
+
     /**
      * @param type the type to set
      */
@@ -138,17 +157,37 @@ public class ONETexture extends ONEObject
     /**
      * @return the res
      */
-    public int getResolution()
+    public int getWidth()
     {
-        return this.getIntParameter("RESOLUTION");
+        return this.getIntParameter("WIDTH");
     }
-    
+
     /**
      * @return the res
      */
-    public void setResolution(int res)
+    public int getHeight()
     {
-        this.setParameter("RESOLUTION", Integer.toString(res));
+        return this.getIntParameter("HEIGHT");
     }
+
+    /**
+     * @return the res
+     */
+    public int getDepth()
+    {
+        return this.getIntParameter("DEPTH");
+    }
+
+    /**
+     * @return the res
+     */
+    public void setSize(int width, int height, int depth)
+    {
+        this.setParameter("WIDTH", Integer.toString(width));
+        this.setParameter("HEIGHT", Integer.toString(height));
+        this.setParameter("DEPTH", Integer.toString(depth));
+    }
+
     
+
 } //end of ONETexture class

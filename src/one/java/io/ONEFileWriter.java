@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import one.java.ONEParameter;
 import one.java.ONEScene;
@@ -83,7 +84,7 @@ public class ONEFileWriter
             dos.close();
         }
     }
-    
+
     /**
      * Reads the data for the given texture from the input stream
      *
@@ -102,16 +103,20 @@ public class ONEFileWriter
         writer.writeInt(voxels.size());
         writer.flush(dos);
 
-        int dVoxel = 1000;
-        for (int i = 0; i < voxels.size(); i++)
+        int dVoxel = 10000;
+        int numVoxelsWritten = 0;
+        
+        Iterator<ONEVoxel> iterator = voxels.iterator();
+        while (iterator.hasNext())
         {
-            ONEVoxel v = voxels.get(i);
+            ONEVoxel v = iterator.next();
             v.write(writer);
 
             //Write out every 1000 voxels
-            if ((i + 1) % dVoxel == 0)
+            if (numVoxelsWritten++ > dVoxel)
             {
                 writer.flush(dos);
+                numVoxelsWritten = 0;
             }
         }
 
@@ -221,7 +226,5 @@ public class ONEFileWriter
         raf.writeUTF(texture.getName());
         this.writeParameters(raf, texture.getParameters());
     }
-
-    
 
 } //end of ONEFileWriter class

@@ -91,6 +91,23 @@ public abstract class ONEObject implements Serializable
     {
         return (this.name);
     }
+    
+    /**
+     * Removes obsolete parameters, adds new required ones etc
+     */
+    public void clean()
+    {        
+    }
+    
+    /**
+     * Called when we deserialize this object
+     * @return 
+     */
+    protected Object readResolve()
+    {
+        this.clean();
+        return (this);
+    }
 
     /**
      * Sets the name of our object
