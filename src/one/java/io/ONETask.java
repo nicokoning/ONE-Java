@@ -9,7 +9,7 @@ package one.java.io;
  * ONE read and write tasks
  * @author wsteffen
  */
-public class ONEProgress
+public class ONETask
 {
     //Total number of steps in the process
     private long numSteps = 0;
@@ -18,6 +18,11 @@ public class ONEProgress
     //The name of the process being monitored
     private String processName = "";
 
+    public ONETask(String taskName, long numSteps)
+    {
+        this.processName = taskName;
+        this.numSteps = numSteps;
+    }
     /**
      * Returns the percentage of the progress done
      * @return 
@@ -35,14 +40,6 @@ public class ONEProgress
     }
 
     /**
-     * @param numSteps the numSteps to set
-     */
-    protected void setNumSteps(long numSteps)
-    {
-        this.numSteps = numSteps;
-    }
-
-    /**
      * @return the currentStep
      */
     public long getCurrentStep()
@@ -57,22 +54,17 @@ public class ONEProgress
     {
         this.currentStep = currentStep;
     }
+    
+    protected void addCurentSteps(long toAdd)
+    {
+        this.currentStep += toAdd;
+    }
 
     /**
      * @return the processName
      */
-    public String getProcessName()
+    public String getTaskName()
     {
         return processName;
     }
-
-    /**
-     * @param processName the processName to set
-     */
-    protected void setProcessName(String processName)
-    {
-        this.processName = processName;
-    }
-    
-    
 }

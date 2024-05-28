@@ -26,11 +26,15 @@ import one.java.voxels.ONEVoxel;
 public class ONEFileReader
 {
 
+    //Monitors that progress of tasks
+    private ONETaskMonitor taskMonitor;
+
     /**
      * Creates a new ONEFileReader object
      */
     public ONEFileReader()
     {
+        this.taskMonitor = new ONETaskMonitor();
     } //end of constructor
 
     /**
@@ -74,12 +78,25 @@ public class ONEFileReader
         BufferedInputStream stream = null;
         try
         {
-            stream = new BufferedInputStream(new FileInputStream(filename));
-            for (int i = 0; i < scene.getTextures().size(); i++)
+            ONETask task = new ONETask("Reading ONE textures...", scene.getTextures().size());
+            this.taskMonitor.add(task);
+
+            try
             {
-                ONETexture texture = scene.getTextures().get(i);
-                this.readData(texture, false, stream);
+                stream = new BufferedInputStream(new FileInputStream(filename));
+                for (int i = 0; i < scene.getTextures().size(); i++)
+                {
+                    ONETexture texture = scene.getTextures().get(i);
+                    this.readData(texture, false, stream);
+                    task.setCurrentStep(i);
+                }
             }
+            finally
+            {
+                //Remove the top task, should be ours
+                this.taskMonitor.remove();
+            }
+
         }
         finally
         {
@@ -137,7 +154,7 @@ public class ONEFileReader
         //The size of each voxel in bytes
         int voxelByteSize = texture.newVoxel().sizeInBytes();
         //How many bytes do we have to read to get all the voxel data?
-        long bytesToRead = (long)numVoxels * (long)voxelByteSize;
+        long bytesToRead = (long) numVoxels * (long) voxelByteSize;
 
         //If we want to skip this texture, just leave, we are at the right place
         if (skip)
@@ -161,27 +178,39 @@ public class ONEFileReader
         voxelList.ensureCapacity(voxelList.size() + numVoxels);
 
         long bytesRead = 0;
-        while (bytesRead < bytesToRead)
+        ONETask task = new ONETask("Reading ONE texture: " + texture.getName() + "", numVoxels);
+        this.taskMonitor.add(task);
+        try
         {
-            //Figure out how many bytes we should read, make sure we don't read too many
-            long readLength = Math.min(bufferSize, bytesToRead - bytesRead);
-            //Read the bytes
-            long read = stream.read(buffer, 0, (int) readLength);
-            //How many voxels did we just read in?
-            int readVoxels = (int) (read / voxelByteSize);
-            //Increment our read bytes
-            bytesRead += read;
-
-            //Add all of the read voxels to our list
-            for (int j = 0; j < readVoxels; j++)
+            while (bytesRead < bytesToRead)
             {
-                ONEVoxel voxel = texture.newVoxel();
-                System.arraycopy(buffer, j * voxelByteSize, voxelBuffer, 0, voxelBuffer.length);
-                byteReader.setBytes(voxelBuffer);
-                voxel.read(byteReader);
-                voxelList.add(voxel);
+                //Figure out how many bytes we should read, make sure we don't read too many
+                long readLength = Math.min(bufferSize, bytesToRead - bytesRead);
+                //Read the bytes
+                long read = stream.read(buffer, 0, (int) readLength);
+                //How many voxels did we just read in?
+                int readVoxels = (int) (read / voxelByteSize);
+                //Increment our read bytes
+                bytesRead += read;
+
+                //Add all of the read voxels to our list
+                for (int j = 0; j < readVoxels; j++)
+                {
+                    ONEVoxel voxel = texture.newVoxel();
+                    System.arraycopy(buffer, j * voxelByteSize, voxelBuffer, 0, voxelBuffer.length);
+                    byteReader.setBytes(voxelBuffer);
+                    voxel.read(byteReader);
+                    voxelList.add(voxel);
+                }
+
+                task.addCurentSteps(readVoxels);
             }
         }
+        finally
+        {
+            this.taskMonitor.remove();
+        }
+
     }
 
     /**
@@ -341,6 +370,14 @@ public class ONEFileReader
         texture.getParameters().clear();
         texture.getParameters().addAll(this.readParameters(raf));
         texture.clean();
+    }
+
+    /**
+     * @return the taskMonitor
+     */
+    public ONETaskMonitor getTaskMonitor()
+    {
+        return taskMonitor;
     }
 
 } //end of ONEFileReader class
