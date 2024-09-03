@@ -41,6 +41,8 @@ public class ONEScene extends ONEObject
     {
 
     } //end of initialize function
+    
+    
 
     /**
      * Clears the scene of all volumes and textures
