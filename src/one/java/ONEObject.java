@@ -4,6 +4,7 @@
  */
 package one.java;
 
+import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.Serializable;
@@ -15,6 +16,7 @@ import java.util.ArrayList;
  */
 public abstract class ONEObject implements Serializable
 {
+
     //The serial version for deserializing
     private static final long serialVersionUID = 1L;
 
@@ -31,6 +33,21 @@ public abstract class ONEObject implements Serializable
     {
         ID = System.nanoTime();
         support = new PropertyChangeSupport(this);
+    }
+
+    /**
+     * Called when we no longer need this object
+     */
+    public void dispose()
+    {
+        PropertyChangeListener[] allListeners = this.support.getPropertyChangeListeners();
+        for (int i = 0; i < allListeners.length; i++)
+        {
+            PropertyChangeListener l = allListeners[i];
+            this.support.removePropertyChangeListener(l);
+        }
+
+        this.support = null;
     }
 
     public void addPropertyChangeListener(PropertyChangeListener pcl)
@@ -91,22 +108,42 @@ public abstract class ONEObject implements Serializable
     {
         return (this.name);
     }
-    
+
     /**
      * Removes obsolete parameters, adds new required ones etc
      */
     public void clean()
-    {        
+    {
     }
-    
+
     /**
      * Called when we deserialize this object
-     * @return 
+     *
+     * @return
      */
     protected Object readResolve()
     {
         this.clean();
         return (this);
+    }    
+   
+    protected void firePropertyChange(Object source, String name, Object oldValue, Object newValue)
+    {
+        if (oldValue == newValue) //takes care of both null case
+        {
+            return;
+        }
+
+        PropertyChangeEvent event = new PropertyChangeEvent(source, name, oldValue, newValue);
+        if(this.support == null)
+            return;
+        
+        this.support.firePropertyChange(event);
+    }
+
+    protected void firePropertyChange(String name, Object oldValue, Object newValue)
+    {
+        this.firePropertyChange(this, name, oldValue, newValue);
     }
 
     /**
@@ -116,7 +153,7 @@ public abstract class ONEObject implements Serializable
     {
         String oldValue = this.name;
         this.name = s;
-        this.support.firePropertyChange("name", oldValue, this.name);
+        this.firePropertyChange("name", oldValue, this.name);
     }
 
     /**
@@ -134,8 +171,8 @@ public abstract class ONEObject implements Serializable
     {
         long oldID = this.ID;
         this.ID = ID;
-        this.support.firePropertyChange("id", oldID, this.ID);
-        
+        this.firePropertyChange("id", oldID, this.ID);
+
     }
 
     /**
@@ -144,6 +181,29 @@ public abstract class ONEObject implements Serializable
     public ArrayList<ONEParameter> getParameters()
     {
         return (this.parameters);
+    }
+
+    /**
+     * Adds the parameter if it does not exist, and gives it the default value.
+     * If it already exists, it will not change it.
+     */
+    public ONEParameter addParameter(String key, String defaultValue)
+    {
+        ONEParameter searchParam = new ONEParameter(key, defaultValue);
+
+        int index = this.parameters.indexOf(searchParam);
+
+        //If it exists, return it
+        if (index >= 0)
+        {
+            return (this.parameters.get(index));
+        }
+
+        getParameters().add(searchParam);
+
+        this.firePropertyChange(key, null, defaultValue);
+
+        return (searchParam);
     }
 
     /**
@@ -156,23 +216,24 @@ public abstract class ONEObject implements Serializable
     public void setParameter(String key, String value)
     {
         ONEParameter searchParam = new ONEParameter(key, value);
-
         int index = this.parameters.indexOf(searchParam);
 
         //If it exists, update it
         if (index >= 0)
         {
+            String oldValue = this.parameters.get(index).value;
             this.parameters.get(index).setValue(value);
+            this.firePropertyChange(key, oldValue, value);
         }
 
         //Otherwise add it
         else
         {
             //Add the new one
-            getParameters().add(searchParam);
+            this.addParameter(key, value);
+            return;
         }
 
-        this.support.firePropertyChange(key, null, value);
     }
 
     /**
@@ -185,11 +246,12 @@ public abstract class ONEObject implements Serializable
             ONEParameter param = this.parameters.get(i);
             if (param.key.equals(key))
             {
+                String oldValue = param.value;
                 this.parameters.remove(i--);
+                this.firePropertyChange(key, oldValue, null);
             }
         }
 
-        this.support.firePropertyChange(key, null, null);
     }
 
     /**

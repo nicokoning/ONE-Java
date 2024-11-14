@@ -43,7 +43,7 @@ public class ONEFileWriter
         //Now write the header out
         this.writeHeader(scene, filename);
     }
-
+    
     /**
      * Writes the list of parameters as a single string, each split by '!@'
      */

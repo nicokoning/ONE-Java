@@ -4,6 +4,8 @@
  */
 package one.java;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 
 /**
@@ -26,6 +28,9 @@ public class ONEScene extends ONEObject
     //The list of volumes
     protected ArrayList<ONEVolume> volumes = new ArrayList<>();
 
+    //listens for property changes from its children
+    private transient PropertyChangeListener propertyChangedListener;
+
     /**
      * Creates a new ONEScene object
      */
@@ -39,8 +44,43 @@ public class ONEScene extends ONEObject
      */
     private void initialize()
     {
+        //Add some default parameters
+        this.addParameter("AUTO_EXPOSURE", "true");
+        this.addParameter("EXPOSURE", "1");
+        this.addParameter("EMISSION", "1");
+        this.addParameter("OPACITY", "1");
+        this.addParameter("SCALE_POWER", "1");
+        this.addParameter("ROT_X", "0");
+        this.addParameter("ROT_Y", "0");
+        this.addParameter("ROT_Z", "0");
+        
+        this.initializeTransient();
 
     } //end of initialize function
+
+    /**
+     * Initializes the object
+     */
+    private void initializeTransient()
+    {
+        this.propertyChangedListener = (PropertyChangeEvent evt) ->
+        {
+            this.firePropertyChange(evt.getSource(), evt.getPropertyName(), evt.getOldValue(), evt.getNewValue());
+        };
+
+    } //end of initialize function
+
+    public void dispose()
+    {
+        super.dispose();
+        this.clear();
+    }
+
+    protected Object readResolve()
+    {
+        this.initializeTransient();
+        return (this);
+    }
     
     
 
@@ -51,13 +91,13 @@ public class ONEScene extends ONEObject
     {
         for (ONETexture t : this.textures)
         {
-            t.clearData();
+            t.dispose();
         }
         this.textures.clear();
 
         for (ONEVolume v : this.volumes)
         {
-            v.clearTextureIDs();
+            v.dispose();
         }
         this.volumes.clear();
 
@@ -91,6 +131,10 @@ public class ONEScene extends ONEObject
         {
             this.addVolume(oneVolume);
         }
+
+        //Listen for property changes
+        object.addPropertyChangeListener(propertyChangedListener);
+        this.firePropertyChange(this, "ADD", null, object);
     }
 
     private void addVolume(ONEVolume v)
@@ -141,13 +185,15 @@ public class ONEScene extends ONEObject
         {
             //Now remove the texture
             this.textures.remove(oneTexture);
-            oneTexture.clearData();
         }
 
         if (object instanceof ONEVolume oneVolume)
         {
             this.volumes.remove(oneVolume);
         }
+
+        object.dispose();
+        this.firePropertyChange(this, "REMOVE", object, null);
 
     }
 
@@ -249,5 +295,6 @@ public class ONEScene extends ONEObject
     {
         return volumes;
     }
+
 
 } //end of ONEScene class

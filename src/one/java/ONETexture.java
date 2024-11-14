@@ -33,6 +33,9 @@ public class ONETexture extends ONEObject
     public ONETexture(ONE_TEXTURE_TYPE type)
     {
         this.setType(type);
+        this.addParameter("WIDTH", "0");
+        this.addParameter("HEIGHT", "0");
+        this.addParameter("DEPTH", "0");
     } //end of constructor
 
     /**
@@ -43,6 +46,12 @@ public class ONETexture extends ONEObject
         this(ONE_TEXTURE_TYPE.RGBA_BYTE);
     } //end of constructor
 
+    public void dispose()
+    {
+        super.dispose();
+        this.clearData();
+    }
+
     /**
      * Removes obsolete parameters, adds new required ones etc
      */
@@ -52,10 +61,10 @@ public class ONETexture extends ONEObject
 
         //Check to see if this is an older version that used RESOLUTION
         int res = this.getIntParameter("RESOLUTION");
-         this.removeParameter("RESOLUTION");
+        this.removeParameter("RESOLUTION");
         if (this.getWidth() == 0 && this.getHeight() == 0 && this.getDepth() == 0 && res != 0)
         {
-            this.setSize(res, res, res);           
+            this.setSize(res, res, res);
         }
     }
 
@@ -187,7 +196,5 @@ public class ONETexture extends ONEObject
         this.setParameter("HEIGHT", Integer.toString(height));
         this.setParameter("DEPTH", Integer.toString(depth));
     }
-
-    
 
 } //end of ONETexture class

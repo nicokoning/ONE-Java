@@ -16,7 +16,23 @@ public class ONEVolume extends ONEObject
      */
     public ONEVolume()
     {
+        this.addParameter("SCALE_X", "1");
+        this.addParameter("SCALE_Y", "1");
+        this.addParameter("SCALE_Z", "1");
+        
+        this.addParameter("OFFSET_X", "0");
+        this.addParameter("OFFSET_Y", "0");
+        this.addParameter("OFFSET_Z", "0");
+        
+        this.addParameter("ORDER", "0");
     } //end of constructor
+    
+    public void dispose()
+    {
+        this.clearTextureIDs();
+        super.dispose();
+        
+    }
     
     /**
      * Removes obsolete parameters, adds new required ones etc
@@ -42,7 +58,22 @@ public class ONEVolume extends ONEObject
         this.setParameter("EMISSION", "" + value);
     }
 
+   
+
     /**
+     * Return the emission parameter value
+     * @return the emission parameter value if it exists
+     */
+    public double getEmission()
+    {
+        if(this.getParameter("EMISSION") == null)
+            return(1);
+        
+        return (this.getDoubleParameter("EMISSION"));
+
+    }
+    
+     /**
      * Sets the opacity parameter
      */ 
     public void setOpacity(double value)
@@ -58,15 +89,22 @@ public class ONEVolume extends ONEObject
     {
         return (this.getDoubleParameter("OPACITY"));
     }
+    
+     /**
+     * Sets the blend parameter
+     */ 
+    public void setBlend(double value)
+    {
+        this.setParameter("BLEND", "" + value);
+    }
 
     /**
-     * Return the emission parameter value
-     * @return the emission parameter value if it exists
+     * Return the blend parameter value
+     * @return the blend parameter value if it exists
      */
-    public double getEmission()
+    public double getBlend()
     {
-        return (this.getDoubleParameter("EMISSION"));
-
+        return (this.getDoubleParameter("BLEND"));
     }
 
     /**
@@ -99,6 +137,22 @@ public class ONEVolume extends ONEObject
     public void setReplace(boolean replace)
     {
         this.setParameter("REPLACE", "" + replace);
+    }
+    
+      /**
+     * @return the visible parameter, if it doesn't exist then we return true by default
+     */
+    public boolean isVisible()
+    {
+        return(this.getParameter("VISIBLE") == null || this.getBooleanParameter("VISIBLE"));
+    }
+
+    /**
+     * @param replace the replace to set
+     */
+    public void setVisible(boolean vis)
+    {
+        this.setParameter("VISIBLE", "" + vis);
     }
 
     /**
@@ -270,5 +324,5 @@ public class ONEVolume extends ONEObject
 
         return (rArray);
     }
-
+    
 } //end of ONEVolume class
