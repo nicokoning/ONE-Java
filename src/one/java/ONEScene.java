@@ -53,7 +53,7 @@ public class ONEScene extends ONEObject
         this.addParameter("ROT_X", "0");
         this.addParameter("ROT_Y", "0");
         this.addParameter("ROT_Z", "0");
-        
+
         this.initializeTransient();
 
     } //end of initialize function
@@ -81,8 +81,6 @@ public class ONEScene extends ONEObject
         this.initializeTransient();
         return (this);
     }
-    
-    
 
     /**
      * Clears the scene of all volumes and textures
@@ -183,18 +181,39 @@ public class ONEScene extends ONEObject
 
         if (object instanceof ONETexture oneTexture)
         {
-            //Now remove the texture
-            this.textures.remove(oneTexture);
+            this.remove(oneTexture);
         }
 
         if (object instanceof ONEVolume oneVolume)
         {
-            this.volumes.remove(oneVolume);
+            this.remove(oneVolume);
         }
 
-        object.dispose();
-        this.firePropertyChange(this, "REMOVE", object, null);
+    }
 
+    private void remove(ONEVolume volume)
+    {
+        this.volumes.remove(volume);
+
+        volume.dispose();
+        this.firePropertyChange(this, "REMOVE", volume, null);
+    }
+
+    private void remove(ONETexture texture)
+    {
+        //Now remove the texture
+        this.textures.remove(texture);
+
+        //Get the volume that holds this texture
+        ArrayList<ONEVolume> volumes = this.getVolumes(texture);
+        for (int i = 0; i < volumes.size(); i++)
+        {
+            ONEVolume volume = volumes.get(i);
+            volume.removeTextureIDs(texture.getID());
+        }
+
+        texture.dispose();
+        this.firePropertyChange(this, "REMOVE", texture, null);
     }
 
     /**
@@ -295,6 +314,5 @@ public class ONEScene extends ONEObject
     {
         return volumes;
     }
-
 
 } //end of ONEScene class

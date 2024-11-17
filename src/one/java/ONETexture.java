@@ -136,6 +136,112 @@ public class ONETexture extends ONEObject
         }
     }
 
+    /**
+     * Returns true if the given index is valid for this texture
+     *
+     * @param x
+     * @param y
+     * @param z
+     * @return
+     */
+    public boolean isValid(int x, int y, int z)
+    {
+        if (x < 0 || y < 0 || z < 0)
+        {
+            return (false);
+        }
+
+        if (x >= this.getWidth() || y >= this.getHeight() || z >= this.getDepth())
+        {
+            return (false);
+        }
+
+        return (true);
+    }
+
+    
+    /**
+     * Scales each voxel in this texture by the appropriate value given
+     */ 
+    public void scale(double rFactor, double gFactor, double bFactor, double aFactor)
+    {
+        for(int i = 0; i < this.voxelList.size(); i++)
+        {
+            ONEVoxel v = this.voxelList.get(i);
+            v.scaleColor(rFactor, gFactor, bFactor, aFactor);
+        }
+    }
+    
+    /**
+     * Adds the given texture to this one (cell index by cell index)
+     *
+     * @param tex
+     */
+    public void add(ONETexture tex) throws Exception
+    {
+        //Index our voxels
+        int[][][] indexArray = new int[this.getWidth()][this.getHeight()][this.getDepth()];
+        for(int i = 0; i < this.voxelList.size(); i++)
+        {
+            ONEVoxel v = this.voxelList.get(i);
+            int x = v.getIndex()[0];
+            int y = v.getIndex()[1];
+            int z = v.getIndex()[2];
+            
+            indexArray[x][y][z] = i+1;
+        }
+        
+        for (int i = 0; i < tex.getVoxels().size(); i++)
+        {
+            ONEVoxel v1 = tex.getVoxels().get(i);
+            int x = v1.getIndex()[0];
+            int y = v1.getIndex()[1];
+            int z = v1.getIndex()[2];
+
+            //make sure we can set this voxel
+            if (!this.isValid(x, y, z))
+            {
+                continue;
+            }
+
+            int index = indexArray[x][y][z]-1;
+            if (index < 0)
+            {
+                ONEVoxel newVoxel = this.newVoxel();
+                newVoxel.setIndex(v1.getIndex()[0], v1.getIndex()[1], v1.getIndex()[2]);
+                newVoxel.setColor(v1.getR(), v1.getG(), v1.getB(), v1.getA());
+                this.getVoxels().add(newVoxel);
+                indexArray[x][y][z] = this.voxelList.size();
+                continue;
+            }
+
+            else
+            {
+                ONEVoxel v0 = this.voxelList.get(index);
+                v0.addColor(v1.getR(), v1.getG(), v1.getB(), v1.getA());                
+            }
+
+        }
+    }
+
+    /**
+     * Returns the voxel with the given index. NULL means it doesn't exist (i.e.
+     * empty)
+     */
+    public ONEVoxel getVoxel(int x, int y, int z)
+    {
+        for (int i = 0; i < this.voxelList.size(); i++)
+        {
+            ONEVoxel v = this.voxelList.get(i);
+            if (v.getIndex()[0] == x && v.getIndex()[1] == y && v.getIndex()[2] == z)
+            {
+                return (v);
+            }
+        }
+
+        return (null);
+    }
+
     //--------------------------------------------------------------------------
     // Getter and Setter methods
     //--------------------------------------------------------------------------

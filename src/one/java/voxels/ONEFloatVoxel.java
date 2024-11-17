@@ -9,8 +9,18 @@ import one.java.io.ONEByteWriter;
  */
 public class ONEFloatVoxel extends ONEVoxel<Float>
 {
+
     //The serial version for deserializing
     private static final long serialVersionUID = 1L;
+
+    public ONEFloatVoxel()
+    {
+    }
+
+    public ONEFloatVoxel(int x, int y, int z, float r, float g, float b, float a)
+    {
+        this.setColor(r, g, b, a);
+    }
 
     @Override
     public ONEVoxel copy()
@@ -29,21 +39,18 @@ public class ONEFloatVoxel extends ONEVoxel<Float>
     }
 
     @Override
-    public void setColor(Number r, Number g, Number b, Number a)
+    public Float getValue(Number n)
     {
-        this.r = r.floatValue();
-        this.g = g.floatValue();
-        this.b = b.floatValue();
-        this.a = a.floatValue();
+        return (n.floatValue());
     }
-    
-     @Override
+
+    @Override
     public void write(ONEByteWriter writer) throws Exception
     {
         writer.writeInt(this.xIndex);
         writer.writeInt(this.yIndex);
         writer.writeInt(this.zIndex);
-        
+
         writer.writeFloat(this.r);
         writer.writeFloat(this.g);
         writer.writeFloat(this.b);

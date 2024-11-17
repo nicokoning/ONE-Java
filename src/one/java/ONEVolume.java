@@ -269,6 +269,15 @@ public class ONEVolume extends ONEObject
             this.setParameter(key, "" + ids[i]);
         }
     }
+    
+    public void removeTextureIDs(long... ids)
+    {        
+        for (int i = 0; i < ids.length; i++)
+        {
+            String key = "TEXTURE_ID_" + i;
+            this.removeParameter(key);
+        }
+    }
 
     /**
      * Adds the given texture IDs to this volume mapping

@@ -30,12 +30,9 @@ public class ONEByteVoxel extends ONEVoxel<Byte>
     }
 
     @Override
-    public void setColor(Number r, Number g, Number b, Number a)
+    public Byte getValue(Number n)
     {
-        this.r = r.byteValue();
-        this.g = g.byteValue();
-        this.b = b.byteValue();
-        this.a = a.byteValue();
+        return (n.byteValue());
     }
 
     @Override
@@ -44,7 +41,7 @@ public class ONEByteVoxel extends ONEVoxel<Byte>
         writer.writeInt(this.xIndex);
         writer.writeInt(this.yIndex);
         writer.writeInt(this.zIndex);
-        
+
         writer.writeByte(this.r);
         writer.writeByte(this.g);
         writer.writeByte(this.b);
