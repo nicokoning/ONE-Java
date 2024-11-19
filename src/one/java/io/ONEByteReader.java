@@ -115,6 +115,9 @@ public class ONEByteReader
 
     public final void setBuffer(ByteBuffer buffer)
     {
+        if(this.buffer != null)
+            this.buffer.clear();
+        
         this.buffer = buffer;
     }
 

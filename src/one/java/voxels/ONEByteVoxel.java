@@ -13,6 +13,8 @@ public class ONEByteVoxel extends ONEVoxel<Byte>
     //The serial version for deserializing
     private static final long serialVersionUID = 1L;
 
+    private byte r, g, b, a;
+
     @Override
     public ONEVoxel copy()
     {
@@ -27,12 +29,6 @@ public class ONEByteVoxel extends ONEVoxel<Byte>
     {
         int size = ONEByteReader.BYTE_SIZE;
         return (size);
-    }
-
-    @Override
-    public Byte getValue(Number n)
-    {
-        return (n.byteValue());
     }
 
     @Override
@@ -60,5 +56,71 @@ public class ONEByteVoxel extends ONEVoxel<Byte>
         this.g = reader.nextByte();
         this.b = reader.nextByte();
         this.a = reader.nextByte();
+    }
+
+    @Override
+    public void scaleColor(double rFactor, double gFactor, double bFactor, double aFactor)
+    {
+        this.r *= rFactor;
+        this.g *= gFactor;
+        this.b *= bFactor;
+        this.a *= aFactor;
+    }
+
+    @Override
+    public void addColor(Number r, Number g, Number b, Number a)
+    {
+        this.r += r.byteValue();
+        this.g += g.byteValue();
+        this.b += b.byteValue();
+        this.a += a.byteValue();
+    }
+
+    @Override
+    public Byte getR()
+    {
+        return (r);
+    }
+
+    @Override
+    public Byte getG()
+    {
+        return (g);
+    }
+
+    @Override
+    public Byte getB()
+    {
+        return (b);
+    }
+
+    @Override
+    public Byte getA()
+    {
+        return (a);
+    }
+
+    @Override
+    public void setR(Number r)
+    {
+        this.r = r.byteValue();
+    }
+
+    @Override
+    public void setG(Number g)
+    {
+        this.g = g.byteValue();
+    }
+
+    @Override
+    public void setB(Number b)
+    {
+        this.b = b.byteValue();
+    }
+
+    @Override
+    public void setA(Number a)
+    {
+        this.a = a.byteValue();
     }
 }

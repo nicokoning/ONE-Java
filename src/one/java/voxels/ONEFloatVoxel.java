@@ -9,9 +9,10 @@ import one.java.io.ONEByteWriter;
  */
 public class ONEFloatVoxel extends ONEVoxel<Float>
 {
-
     //The serial version for deserializing
     private static final long serialVersionUID = 1L;
+    
+    private float r,g,b,a;
 
     public ONEFloatVoxel()
     {
@@ -39,12 +40,6 @@ public class ONEFloatVoxel extends ONEVoxel<Float>
     }
 
     @Override
-    public Float getValue(Number n)
-    {
-        return (n.floatValue());
-    }
-
-    @Override
     public void write(ONEByteWriter writer) throws Exception
     {
         writer.writeInt(this.xIndex);
@@ -69,5 +64,71 @@ public class ONEFloatVoxel extends ONEVoxel<Float>
         this.g = reader.nextFloat();
         this.b = reader.nextFloat();
         this.a = reader.nextFloat();
+    }
+    
+    @Override
+    public void scaleColor(double rFactor, double gFactor, double bFactor, double aFactor)
+    {
+        this.r *= rFactor;
+        this.g *= gFactor;
+        this.b *= bFactor;
+        this.a *= aFactor;
+    }
+
+    @Override
+    public void addColor(Number r, Number g, Number b, Number a)
+    {
+        this.r += r.floatValue();
+        this.g += g.floatValue();
+        this.b += b.floatValue();
+        this.a += a.floatValue();
+    }
+
+    @Override
+    public Float getR()
+    {
+        return (r);
+    }
+
+    @Override
+    public Float getG()
+    {
+        return (g);
+    }
+
+    @Override
+    public Float getB()
+    {
+        return (b);
+    }
+
+    @Override
+    public Float getA()
+    {
+        return (a);
+    }
+
+    @Override
+    public void setR(Number r)
+    {
+        this.r = r.floatValue();
+    }
+
+    @Override
+    public void setG(Number g)
+    {
+        this.g = g.floatValue();
+    }
+
+    @Override
+    public void setB(Number b)
+    {
+        this.b = b.floatValue();
+    }
+
+    @Override
+    public void setA(Number a)
+    {
+        this.a = a.floatValue();
     }
 }

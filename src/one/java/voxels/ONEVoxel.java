@@ -13,19 +13,9 @@ import one.java.io.ONEByteWriter;
  */
 public abstract class ONEVoxel<T extends Number>
 {
-
     protected int xIndex;
     protected int yIndex;
     protected int zIndex;
-
-    //The components of the voxel
-    protected T r;
-    //The components of the voxel
-    protected T g;
-    //The components of the voxel
-    protected T b;
-    //The components of the voxel
-    protected T a;
 
     /**
      * Creates a new ONEVoxel object
@@ -51,7 +41,7 @@ public abstract class ONEVoxel<T extends Number>
     @Override
     public String toString()
     {
-        return ("(" + this.xIndex + "," + this.yIndex + "," + this.zIndex + ") : [" + this.r.toString() + "," + this.g.toString() + "," + this.b.toString() + "," + this.a.toString() + "]");
+        return ("(" + this.xIndex + "," + this.yIndex + "," + this.zIndex + ") : [" + this.getR().toString() + "," + this.getG().toString() + "," + this.getB().toString() + "," + this.getA().toString() + "]");
     }
 
     /**
@@ -59,7 +49,7 @@ public abstract class ONEVoxel<T extends Number>
      */
     public boolean isZero()
     {
-        return (r.equals(0) && g.equals(0) && b.equals(0) && a.equals(0));
+        return (getR().equals(0) && getG().equals(0) && getB().equals(0) && getA().equals(0));
     }
 
     /**
@@ -82,7 +72,11 @@ public abstract class ONEVoxel<T extends Number>
             return (false);
         }
 
-        if (!(this.r.equals(v.r) && this.g.equals(v.g) && this.b.equals(v.b) && this.a.equals(v.a)))
+        if (!(
+                this.getR().equals(v.getR()) 
+                && this.getG().equals(v.getG()) 
+                && this.getB().equals(v.getB()) 
+                && this.getA().equals(v.getA())))
         {
             return (false);
         }
@@ -107,53 +101,24 @@ public abstract class ONEVoxel<T extends Number>
     }
 
     /**
-     * Returns the value from the number appropriate for this voxel type
-     *
-     * @param n
-     * @return
-     */
-    public abstract T getValue(Number n);
-
-    /**
      * Scales each voxel in this texture by the appropriate value given
      */
-    public final void scaleColor(double rFactor, double gFactor, double bFactor, double aFactor)
-    {
-        double r0 = this.getR().doubleValue() * rFactor;
-        double g0 = this.getG().doubleValue() * gFactor;
-        double b0 = this.getB().doubleValue() * bFactor;
-        double a0 = this.getA().doubleValue() * aFactor;
-        
-        this.setColor(r0, g0, b0, a0);
-    }
+    public abstract void scaleColor(double rFactor, double gFactor, double bFactor, double aFactor);
 
     /**
      * Sets the voxel color
      */
-    public final void addColor(Number r, Number g, Number b, Number a)
-    {
-        Number r0 = this.getR();
-        Number g0 = this.getG();
-        Number b0 = this.getB();
-        Number a0 = this.getA();
-
-        double r1 = r0.doubleValue() + r.doubleValue();
-        double g1 = g0.doubleValue() + g.doubleValue();
-        double b1 = b0.doubleValue() + b.doubleValue();
-        double a1 = a0.doubleValue() + a.doubleValue();
-
-        this.setColor(r1, g1, b1, a1);
-    }
+    public abstract void addColor(Number r, Number g, Number b, Number a);
 
     /**
      * Sets the voxel color
      */
     public final void setColor(Number r, Number g, Number b, Number a)
     {
-        this.r = this.getValue(r);
-        this.g = this.getValue(g);
-        this.b = this.getValue(b);
-        this.a = this.getValue(a);
+        this.setR(r);
+        this.setG(g);
+        this.setB(b);
+        this.setA(a);
     }
 
     /**
@@ -194,34 +159,46 @@ public abstract class ONEVoxel<T extends Number>
     /**
      * @return the r
      */
-    public T getR()
-    {
-        return r;
-    }
+    public abstract T getR();
 
     /**
      * @return the g
      */
-    public T getG()
-    {
-        return g;
-    }
+    public abstract T getG();
 
     /**
      * @return the b
      */
-    public T getB()
-    {
-        return b;
-    }
+    public abstract T getB();
 
     /**
      * @return the a
      */
-    public T getA()
-    {
-        return a;
-    }
+    public abstract T getA();
+
+    /**
+     *
+     * @param r
+     */
+    public abstract void setR(Number r);
+
+    /**
+     *
+     * @param r
+     */
+    public abstract void setG(Number g);
+
+    /**
+     *
+     * @param r
+     */
+    public abstract void setB(Number b);
+
+    /**
+     *
+     * @param r
+     */
+    public abstract void setA(Number a);
 
     /**
      * Writes this voxel values to the given writer

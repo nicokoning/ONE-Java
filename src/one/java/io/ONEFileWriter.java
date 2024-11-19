@@ -4,9 +4,11 @@
  */
 package one.java.io;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
@@ -25,12 +27,16 @@ import one.java.voxels.ONEVoxel;
  */
 public class ONEFileWriter
 {
+    //Monitors that progress of tasks
+
+    private ONETaskMonitor taskMonitor;
 
     /**
      * Creates a new ONEFileWriter object
      */
     public ONEFileWriter()
     {
+        this.taskMonitor = new ONETaskMonitor();
     } //end of constructor
 
     /**
@@ -43,7 +49,7 @@ public class ONEFileWriter
         //Now write the header out
         this.writeHeader(scene, filename);
     }
-    
+
     /**
      * Writes the list of parameters as a single string, each split by '!@'
      */
@@ -69,6 +75,9 @@ public class ONEFileWriter
      */
     private void writeData(ONEScene scene, String filename) throws Exception
     {
+        ONETask task = new ONETask("Writing ONE textures...", scene.getTextures().size());
+        this.taskMonitor.add(task);
+
         DataOutputStream dos = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(filename)));
 
         try
@@ -77,11 +86,14 @@ public class ONEFileWriter
             {
                 ONETexture texture = scene.getTextures().get(i);
                 this.writeData(texture, dos);
+                task.setCurrentStep(i);
             }
         }
         finally
         {
             dos.close();
+            //Remove the top task, should be ours
+            this.taskMonitor.remove();
         }
     }
 
@@ -105,7 +117,7 @@ public class ONEFileWriter
 
         int dVoxel = 10000;
         int numVoxelsWritten = 0;
-        
+
         Iterator<ONEVoxel> iterator = voxels.iterator();
         while (iterator.hasNext())
         {
@@ -225,6 +237,14 @@ public class ONEFileWriter
         raf.writeLong(texture.getID());
         raf.writeUTF(texture.getName());
         this.writeParameters(raf, texture.getParameters());
+    }
+    
+     /**
+     * @return the taskMonitor
+     */
+    public ONETaskMonitor getTaskMonitor()
+    {
+        return taskMonitor;
     }
 
 } //end of ONEFileWriter class
