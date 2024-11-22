@@ -9,9 +9,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedList;
+import one.java.ONEDefaultScene;
 import one.java.ONEParameter;
 import one.java.ONEScene;
 import static one.java.ONEScene.ONE_ID;
@@ -43,7 +41,7 @@ public class ONEFileReader
     public ONEScene read(String filename) throws Exception
     {
         //The scene we are reading to
-        ONEScene scene = new ONEScene();
+        ONEScene scene = this.newScene();
         this.read(scene, filename);
 
         return (scene);
@@ -73,7 +71,7 @@ public class ONEFileReader
      * Reads the texture data into the scene. The header is needed before we can
      * do this (the scene has a valid header)
      */
-    private void readData(ONEScene scene, String filename) throws Exception
+    private void readData(ONEScene<? extends ONEVolume, ? extends ONETexture> scene, String filename) throws Exception
     {
         BufferedInputStream stream = null;
         try
@@ -109,14 +107,14 @@ public class ONEFileReader
     }
 
     /**
-     * Reads the data for the given texture from the input stream
+     * Reads a single texture from the oneFile
      *
      * @param texture
      * @param stream
      */
-    public void readTexture(ONEScene scene, ONETexture texture, String filename) throws Exception
+    public void readTexture(ONEScene<? extends ONEVolume, ? extends ONETexture> scene, ONETexture texture, String oneFile) throws Exception
     {
-        BufferedInputStream stream = new BufferedInputStream(new FileInputStream(filename));
+        BufferedInputStream stream = new BufferedInputStream(new FileInputStream(oneFile));
         for (int i = 0; i < scene.getTextures().size(); i++)
         {
             ONETexture sceneTexture = scene.getTextures().get(i);
@@ -294,9 +292,9 @@ public class ONEFileReader
             int numVolumes = raf.readInt();
             for (int i = 0; i < numVolumes; i++)
             {
-                ONEVolume volume = new ONEVolume();
+                ONEVolume volume = scene.newVolume();
                 this.read(volume, raf, version);
-                scene.add(volume);
+                scene.addVolume(volume);
             }
         }
 
@@ -305,13 +303,22 @@ public class ONEFileReader
             int numTextures = raf.readInt();
             for (int i = 0; i < numTextures; i++)
             {
-                ONETexture texture = new ONETexture();
+                ONETexture texture = scene.newTexture();
                 this.read(texture, raf, version);
-                scene.add(texture);
+                scene.addTexture(texture);
             }
         }
     }
-
+    
+    /**
+     * Creates a new scene.  Overridable so you can have your own type.
+     * @return 
+     */
+    protected ONEScene newScene()
+    {
+        return(new ONEDefaultScene());
+    }
+    
     /**
      * Reads the parameter list from the next point in the stream
      *

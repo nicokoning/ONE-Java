@@ -4,16 +4,15 @@
  */
 package one.java.io;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import one.java.ONEDefaultScene;
 import one.java.ONEParameter;
 import one.java.ONEScene;
 import static one.java.ONEScene.ONE_ID;
@@ -73,7 +72,7 @@ public class ONEFileWriter
     /**
      * Writes the data to the given file, will overwrite it if it exists
      */
-    private void writeData(ONEScene scene, String filename) throws Exception
+    private void writeData(ONEScene<? extends ONEVolume, ? extends ONETexture> scene, String filename) throws Exception
     {
         ONETask task = new ONETask("Writing ONE textures...", scene.getTextures().size());
         this.taskMonitor.add(task);
@@ -143,7 +142,7 @@ public class ONEFileWriter
      * @param scene
      * @param filename
      */
-    public void writeHeader(ONEScene scene, String filename) throws Exception
+    public void writeHeader(ONEScene<? extends ONEVolume, ? extends ONETexture> scene, String filename) throws Exception
     {
         File file = new File(filename);
         if (!file.exists())
@@ -157,7 +156,7 @@ public class ONEFileWriter
         //Check to see if there is already a header and if so we need to replace it                
         try
         {
-            ONEScene dummyScene = new ONEScene(); //we don't want to overwrite the one we are about to write!
+            ONEScene dummyScene = new ONEDefaultScene(); //we don't want to overwrite the one we are about to write!
             headerStart = new ONEFileReader().readHeader(dummyScene, filename);
         }
         catch (Exception e)
@@ -171,7 +170,7 @@ public class ONEFileWriter
 
     }
 
-    private void writeHeader(ONEScene scene, RandomAccessFile raf) throws Exception
+    private void writeHeader(ONEScene<? extends ONEVolume, ? extends ONETexture> scene, RandomAccessFile raf) throws Exception
     {
         long headerStart = raf.getFilePointer();
 

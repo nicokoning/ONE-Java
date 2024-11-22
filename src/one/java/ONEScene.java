@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package one.java;
 
 import java.beans.PropertyChangeEvent;
@@ -12,9 +8,8 @@ import java.util.ArrayList;
  *
  * @author Nico
  */
-public class ONEScene extends ONEObject
+public abstract class ONEScene<V extends ONEVolume, T extends ONETexture> extends ONEObject
 {
-
     //The serial version for deserializing
     private static final long serialVersionUID = 1L;
 
@@ -24,9 +19,9 @@ public class ONEScene extends ONEObject
     public static final int ONE_ID = 102380;
 
     //The list of textures
-    protected ArrayList<ONETexture> textures = new ArrayList<>();
+    protected ArrayList<T> textures = new ArrayList<>();
     //The list of volumes
-    protected ArrayList<ONEVolume> volumes = new ArrayList<>();
+    protected ArrayList<V> volumes = new ArrayList<>();
 
     //listens for property changes from its children
     private transient PropertyChangeListener propertyChangedListener;
@@ -70,12 +65,14 @@ public class ONEScene extends ONEObject
 
     } //end of initialize function
 
+    @Override
     public void dispose()
     {
         super.dispose();
         this.clear();
     }
 
+    @Override
     protected Object readResolve()
     {
         this.initializeTransient();
@@ -112,30 +109,20 @@ public class ONEScene extends ONEObject
             this.textures.get(i).clearData();
         }
     }
-
+    
     /**
-     * Adds the object to this scene
-     *
-     * @param object
+     * Creates a new volume of the correct type for this scene
+     * @return 
      */
-    public void add(ONEObject object)
-    {
-        if (object instanceof ONETexture oneTexture)
-        {
-            this.addTexture(oneTexture);
-        }
+    public abstract V newVolume();
+    
+     /**
+     * Creates a new volume of the correct type for this scene
+     * @return 
+     */
+    public abstract T newTexture();
 
-        if (object instanceof ONEVolume oneVolume)
-        {
-            this.addVolume(oneVolume);
-        }
-
-        //Listen for property changes
-        object.addPropertyChangeListener(propertyChangedListener);
-        this.firePropertyChange(this, "ADD", null, object);
-    }
-
-    private void addVolume(ONEVolume v)
+    public void addVolume(V v)
     {
         //If it already exists (same ID) replace it
         int index = volumes.indexOf(v);
@@ -149,22 +136,30 @@ public class ONEScene extends ONEObject
         {
             this.volumes.add(v);
         }
+        
+         //Listen for property changes
+        v.addPropertyChangeListener(propertyChangedListener);
+        this.firePropertyChange(this, "ADD", null, v);
     }
 
-    private void addTexture(ONETexture t)
+    public void addTexture(T t)
     {
         //If it already exists (same ID) replace it
         int index = textures.indexOf(t);
 
         if (index >= 0)
         {
-            ONETexture currentTexture = textures.get(index);
+            T currentTexture = textures.get(index);
             currentTexture.copyHeader(t);
         }
         else
         {
             this.textures.add(t);
         }
+        
+         //Listen for property changes
+        t.addPropertyChangeListener(propertyChangedListener);
+        this.firePropertyChange(this, "ADD", null, t);
     }
 
     /**
@@ -181,17 +176,17 @@ public class ONEScene extends ONEObject
 
         if (object instanceof ONETexture oneTexture)
         {
-            this.remove(oneTexture);
+            this.remove((T)oneTexture);
         }
 
         if (object instanceof ONEVolume oneVolume)
         {
-            this.remove(oneVolume);
+            this.remove((V)oneVolume);
         }
 
     }
 
-    private void remove(ONEVolume volume)
+    private void remove(V volume)
     {
         this.volumes.remove(volume);
 
@@ -199,13 +194,13 @@ public class ONEScene extends ONEObject
         this.firePropertyChange(this, "REMOVE", volume, null);
     }
 
-    private void remove(ONETexture texture)
+    private void remove(T texture)
     {
         //Now remove the texture
         this.textures.remove(texture);
 
         //Get the volume that holds this texture
-        ArrayList<ONEVolume> volumes = this.getVolumes(texture);
+        ArrayList<V> volumes = this.getVolumes(texture);
         for (int i = 0; i < volumes.size(); i++)
         {
             ONEVolume volume = volumes.get(i);
@@ -219,11 +214,11 @@ public class ONEScene extends ONEObject
     /**
      * Returns the texture with the given ID
      */
-    public ONETexture getTexture(long ID)
+    public T getTexture(long ID)
     {
         for (int i = 0; i < this.textures.size(); i++)
         {
-            ONETexture texture = this.textures.get(i);
+            T texture = this.textures.get(i);
             if (texture.getID() == ID)
             {
                 return (texture);
@@ -239,11 +234,11 @@ public class ONEScene extends ONEObject
      * @param ID
      * @return
      */
-    public ONEVolume getVolume(long ID)
+    public V getVolume(long ID)
     {
         for (int i = 0; i < this.volumes.size(); i++)
         {
-            ONEVolume volume = this.volumes.get(i);
+            V volume = this.volumes.get(i);
             if (volume.getID() == ID)
             {
                 return (volume);
@@ -256,12 +251,12 @@ public class ONEScene extends ONEObject
     /**
      * Returns a list of all volumes that are mapped to the given texture
      */
-    public ArrayList<ONEVolume> getVolumes(ONETexture t)
+    public ArrayList<V> getVolumes(T t)
     {
-        ArrayList<ONEVolume> mappedVolumes = new ArrayList<>();
+        ArrayList<V> mappedVolumes = new ArrayList<>();
         for (int i = 0; i < volumes.size(); i++)
         {
-            ONEVolume volume = volumes.get(i);
+            V volume = volumes.get(i);
             long[] tIds = volume.getTextureIDs();
             for (int j = 0; j < tIds.length; j++)
             {
@@ -279,14 +274,14 @@ public class ONEScene extends ONEObject
     /**
      * Returns a list of all textures that are mapped to the given volume
      */
-    public ArrayList<ONETexture> getTextures(ONEVolume v)
+    public ArrayList<T> getTextures(V v)
     {
-        ArrayList<ONETexture> mappedTextures = new ArrayList<>();
+        ArrayList<T> mappedTextures = new ArrayList<>();
 
         long[] tIds = v.getTextureIDs();
         for (int i = 0; i < tIds.length; i++)
         {
-            ONETexture tex = this.getTexture(tIds[i]);
+            T tex = this.getTexture(tIds[i]);
             if (tex != null)
             {
                 mappedTextures.add(tex);
@@ -302,7 +297,7 @@ public class ONEScene extends ONEObject
     /**
      * @return the textureList
      */
-    public ArrayList<ONETexture> getTextures()
+    public ArrayList<T> getTextures()
     {
         return textures;
     }
@@ -310,7 +305,7 @@ public class ONEScene extends ONEObject
     /**
      * @return the volumesList
      */
-    public ArrayList<ONEVolume> getVolumes()
+    public ArrayList<V> getVolumes()
     {
         return volumes;
     }
