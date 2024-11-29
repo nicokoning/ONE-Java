@@ -1,8 +1,7 @@
 package one.java;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
+import one.java.ONEPropertyChangeSupport.ONEPropertyChangeEvent;
 
 /**
  *
@@ -10,6 +9,7 @@ import java.util.ArrayList;
  */
 public abstract class ONEScene<V extends ONEVolume, T extends ONETexture> extends ONEObject
 {
+
     //The serial version for deserializing
     private static final long serialVersionUID = 1L;
 
@@ -24,7 +24,7 @@ public abstract class ONEScene<V extends ONEVolume, T extends ONETexture> extend
     protected ArrayList<V> volumes = new ArrayList<>();
 
     //listens for property changes from its children
-    private transient PropertyChangeListener propertyChangedListener;
+    private transient ONEPropertyChangeListener propertyChangedListener;
 
     /**
      * Creates a new ONEScene object
@@ -58,7 +58,7 @@ public abstract class ONEScene<V extends ONEVolume, T extends ONETexture> extend
      */
     private void initializeTransient()
     {
-        this.propertyChangedListener = (PropertyChangeEvent evt) ->
+        this.propertyChangedListener = (ONEPropertyChangeEvent evt) ->
         {
             this.firePropertyChange(evt.getSource(), evt.getPropertyName(), evt.getOldValue(), evt.getNewValue());
         };
@@ -84,17 +84,15 @@ public abstract class ONEScene<V extends ONEVolume, T extends ONETexture> extend
      */
     public void clear()
     {
-        for (ONETexture t : this.textures)
+        while (!this.textures.isEmpty())
         {
-            t.dispose();
+            this.removeTexture(this.textures.get(0));
         }
-        this.textures.clear();
 
-        for (ONEVolume v : this.volumes)
+        while (!this.volumes.isEmpty())
         {
-            v.dispose();
+            this.removeVolume(this.volumes.get(0));
         }
-        this.volumes.clear();
 
     }
 
@@ -109,16 +107,18 @@ public abstract class ONEScene<V extends ONEVolume, T extends ONETexture> extend
             this.textures.get(i).clearData();
         }
     }
-    
+
     /**
      * Creates a new volume of the correct type for this scene
-     * @return 
+     *
+     * @return
      */
     public abstract V newVolume();
-    
-     /**
+
+    /**
      * Creates a new volume of the correct type for this scene
-     * @return 
+     *
+     * @return
      */
     public abstract T newTexture();
 
@@ -136,8 +136,8 @@ public abstract class ONEScene<V extends ONEVolume, T extends ONETexture> extend
         {
             this.volumes.add(v);
         }
-        
-         //Listen for property changes
+
+        //Listen for property changes
         v.addPropertyChangeListener(propertyChangedListener);
         this.firePropertyChange(this, "ADD", null, v);
     }
@@ -156,37 +156,13 @@ public abstract class ONEScene<V extends ONEVolume, T extends ONETexture> extend
         {
             this.textures.add(t);
         }
-        
-         //Listen for property changes
+
+        //Listen for property changes
         t.addPropertyChangeListener(propertyChangedListener);
         this.firePropertyChange(this, "ADD", null, t);
     }
 
-    /**
-     * Removes the object from our scene
-     *
-     * @param object
-     */
-    public void remove(ONEObject object)
-    {
-        if (object == null)
-        {
-            return;
-        }
-
-        if (object instanceof ONETexture oneTexture)
-        {
-            this.remove((T)oneTexture);
-        }
-
-        if (object instanceof ONEVolume oneVolume)
-        {
-            this.remove((V)oneVolume);
-        }
-
-    }
-
-    private void remove(V volume)
+    public void removeVolume(V volume)
     {
         this.volumes.remove(volume);
 
@@ -194,7 +170,7 @@ public abstract class ONEScene<V extends ONEVolume, T extends ONETexture> extend
         this.firePropertyChange(this, "REMOVE", volume, null);
     }
 
-    private void remove(T texture)
+    public void removeTexture(T texture)
     {
         //Now remove the texture
         this.textures.remove(texture);

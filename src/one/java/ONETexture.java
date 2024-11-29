@@ -15,7 +15,6 @@ import one.java.voxels.ONEVoxel;
  */
 public class ONETexture extends ONEObject
 {
-
     public enum ONE_TEXTURE_TYPE
     {
         RGBA_BYTE, RGBA_FLOAT
