@@ -4,10 +4,12 @@
  */
 package one.java;
 
-import java.beans.PropertyChangeListener;
 import java.io.Serializable;
 import java.util.ArrayList;
-import one.java.ONEPropertyChangeSupport.ONEPropertyChangeEvent;
+import one.java.events.ONEChangeEvent;
+import one.java.events.ONEChangeEventType;
+import one.java.events.ONEChangeListener;
+import one.java.events.ONEChangeSupport;
 
 /**
  *
@@ -15,6 +17,7 @@ import one.java.ONEPropertyChangeSupport.ONEPropertyChangeEvent;
  */
 public abstract class ONEObject implements Serializable
 {
+
     //The serial version for deserializing
     private static final long serialVersionUID = 1L;
 
@@ -25,7 +28,7 @@ public abstract class ONEObject implements Serializable
     //A list of parameters for this object
     private ArrayList<ONEParameter> parameters = new ArrayList<>();
     //For property change notifications
-    private transient ONEPropertyChangeSupport support;
+    private transient ONEChangeSupport support;
 
     public ONEObject()
     {
@@ -38,31 +41,23 @@ public abstract class ONEObject implements Serializable
      */
     public void dispose()
     {
-        PropertyChangeListener[] allListeners = this.support.getPropertyChangeListeners();
-        for (int i = 0; i < allListeners.length; i++)
-        {
-            PropertyChangeListener l = allListeners[i];
-            this.support.removePropertyChangeListener(l);
-        }
-
+        support.clear();
         this.support = null;
     }
-    
+
     private void initializeTransient()
     {
-        this.support = new ONEPropertyChangeSupport(this);
+        this.support = new ONEChangeSupport();
     }
 
-    public void addPropertyChangeListener(ONEPropertyChangeListener pcl)
+    public void addChangeListener(ONEChangeListener l)
     {
-        if(support != null)
-        support.addPropertyChangeListener(pcl);
+        support.addChangeListener(l);
     }
 
-    public void removePropertyChangeListener(ONEPropertyChangeListener pcl)
+    public void removeChangeListener(ONEChangeListener l)
     {
-        if(support != null)
-            support.removePropertyChangeListener(pcl);
+        support.removeChangeListener(l);
     }
 
     /**
@@ -129,31 +124,13 @@ public abstract class ONEObject implements Serializable
     protected Object readResolve()
     {
         this.initializeTransient();
-        this.clean();        
+        this.clean();
         return (this);
-    }    
-   
-    protected void firePropertyChange(ONEObject source, String name, Object oldValue, Object newValue)
-    {
-        if (oldValue == newValue) //takes care of both null case
-        {
-            return;
-        }
-
-        //No change
-        if(oldValue != null && newValue != null && oldValue.equals(newValue))
-            return;
-        
-        ONEPropertyChangeEvent event = new ONEPropertyChangeEvent(source, name, oldValue, newValue);
-        if(this.support == null)
-            return;
-        
-        this.support.firePropertyChange(event);
     }
 
-    protected void firePropertyChange(String name, Object oldValue, Object newValue)
+    protected void fireChangeEvent(ONEChangeEvent event)
     {
-        this.firePropertyChange(this, name, oldValue, newValue);
+        this.support.fireChangeEvent(event);
     }
 
     /**
@@ -163,7 +140,7 @@ public abstract class ONEObject implements Serializable
     {
         String oldValue = this.name;
         this.name = s;
-        this.firePropertyChange("name", oldValue, this.name);
+        this.fireChangeEvent(new ONEChangeEvent(this, ONEChangeEventType.PARAMETER_CHANGED, "name", oldValue, this.name));
     }
 
     /**
@@ -181,8 +158,7 @@ public abstract class ONEObject implements Serializable
     {
         long oldID = this.ID;
         this.ID = ID;
-        this.firePropertyChange("id", oldID, this.ID);
-
+        this.fireChangeEvent(new ONEChangeEvent(this, ONEChangeEventType.PARAMETER_CHANGED, "id", oldID, this.ID));
     }
 
     /**
@@ -210,8 +186,7 @@ public abstract class ONEObject implements Serializable
         }
 
         getParameters().add(searchParam);
-
-        this.firePropertyChange(key, null, defaultValue);
+        this.fireChangeEvent(new ONEChangeEvent(this, ONEChangeEventType.PARAMETER_CHANGED, key, null, defaultValue));
 
         return (searchParam);
     }
@@ -231,13 +206,10 @@ public abstract class ONEObject implements Serializable
         //If it exists, update it
         if (index >= 0)
         {
-            ONEParameter param =  this.parameters.get(index);
+            ONEParameter param = this.parameters.get(index);
             String oldValue = param.value;
-            if(oldValue.equals(value))
-                return;
-            
             param.setValue(value);
-            this.firePropertyChange(key, oldValue, value);
+            this.fireChangeEvent(new ONEChangeEvent(this, ONEChangeEventType.PARAMETER_CHANGED, key, oldValue, value));
         }
 
         //Otherwise add it
@@ -262,7 +234,8 @@ public abstract class ONEObject implements Serializable
             {
                 String oldValue = param.value;
                 this.parameters.remove(i--);
-                this.firePropertyChange(key, oldValue, null);
+
+                this.fireChangeEvent(new ONEChangeEvent(this, ONEChangeEventType.PARAMETER_CHANGED, key, oldValue, null));
             }
         }
 

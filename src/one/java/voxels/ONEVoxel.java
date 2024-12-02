@@ -48,8 +48,8 @@ public abstract class ONEVoxel<T extends Number>
      * Returns true if all the components of the voxel are 0
      */
     public boolean isZero()
-    {
-        return (getR().equals(0) && getG().equals(0) && getB().equals(0) && getA().equals(0));
+    {        
+        return (getR().doubleValue() == 0 && getG().doubleValue() == 0 && getB().doubleValue() == 0 && getA().doubleValue() == 0);
     }
 
     /**

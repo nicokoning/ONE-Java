@@ -294,7 +294,7 @@ public class ONEFileReader
             {
                 ONEVolume volume = scene.newVolume();
                 this.read(volume, raf, version);
-                scene.addVolume(volume);
+                scene.add(volume);
             }
         }
 
@@ -305,7 +305,7 @@ public class ONEFileReader
             {
                 ONETexture texture = scene.newTexture();
                 this.read(texture, raf, version);
-                scene.addTexture(texture);
+                scene.add(texture);
             }
         }
     }
