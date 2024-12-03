@@ -11,6 +11,7 @@ import one.java.events.ONEChangeListener;
  */
 public abstract class ONEScene<V extends ONEVolume, T extends ONETexture> extends ONEObject
 {
+
     //The serial version for deserializing
     private static final long serialVersionUID = 1L;
 
@@ -124,12 +125,12 @@ public abstract class ONEScene<V extends ONEVolume, T extends ONETexture> extend
     public abstract T newTexture();
 
     public void add(ONEObject o)
-    {       
-        if(this.newTexture().getClass().equals(o.getClass()))
+    {
+        if (this.newTexture().getClass().equals(o.getClass()))
         {
             this.add((T) o);
         }
-        else  if(this.newVolume().getClass().equals(o.getClass()))
+        else if (this.newVolume().getClass().equals(o.getClass()))
         {
             this.add((V) o);
         }
@@ -172,17 +173,20 @@ public abstract class ONEScene<V extends ONEVolume, T extends ONETexture> extend
         }
 
         //Listen for property changes
-        t.addChangeListener(changeListener);        
+        t.addChangeListener(changeListener);
         this.fireChangeEvent(new ONEChangeEvent(this, ONEChangeEventType.STRUCTURE_CHANGED, "", null, t));
     }
-    
+
     public void remove(ONEObject o)
-    {       
-        if(this.newTexture().getClass().equals(o.getClass()))
+    {
+        if(o == null)
+            return;
+        
+        if (this.newTexture().getClass().equals(o.getClass()))
         {
             this.remove((T) o);
         }
-        else  if(this.newVolume().getClass().equals(o.getClass()))
+        else if (this.newVolume().getClass().equals(o.getClass()))
         {
             this.remove((V) o);
         }
@@ -191,9 +195,9 @@ public abstract class ONEScene<V extends ONEVolume, T extends ONETexture> extend
 
     public void remove(V volume)
     {
-        this.volumes.remove(volume);
-        volume.dispose();
+        this.volumes.remove(volume);        
         this.fireChangeEvent(new ONEChangeEvent(this, ONEChangeEventType.STRUCTURE_CHANGED, "", volume, null));
+        volume.dispose(); //do this after the fire event
     }
 
     public void remove(T texture)
@@ -209,8 +213,8 @@ public abstract class ONEScene<V extends ONEVolume, T extends ONETexture> extend
             volume.removeTextureIDs(texture.getID());
         }
 
-        texture.dispose();
         this.fireChangeEvent(new ONEChangeEvent(this, ONEChangeEventType.STRUCTURE_CHANGED, "", texture, null));
+        texture.dispose(); //do this after the fire event
     }
 
     /**

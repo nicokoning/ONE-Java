@@ -115,24 +115,29 @@ public class ONETexture extends ONEObject
     }
 
     /**
-     * Creates a new voxel that is compatible with this texture
+     * Creates a new voxel that is compatible with this texture, preassigns the index
      */
-    public ONEVoxel newVoxel() throws Exception
+    public ONEVoxel newVoxel(int x, int y, int z) throws Exception
     {
+        ONEVoxel v = null;
+        
         switch (this.getType())
         {
             case RGBA_FLOAT ->
             {
-                return (new ONEFloatVoxel());
+                v = (new ONEFloatVoxel());
             }
             case RGBA_BYTE ->
             {
-                return (new ONEByteVoxel());
+                v = (new ONEByteVoxel());
             }
 
             default ->
                 throw new Exception("Voxel type is unknown.");
         }
+        
+        v.setIndex(x, y, z);
+        return(v);
     }
 
     /**
@@ -172,11 +177,10 @@ public class ONETexture extends ONEObject
     }
     
     /**
-     * Adds the given texture to this one (cell index by cell index)
-     *
-     * @param tex
+     * Creates an index array for fast lookups into the voxel list.  Each array element represents the index into the voxel list + 1 (an index value of 0 means it does not exist)
+     * @return 
      */
-    public void add(ONETexture tex) throws Exception
+    public int[][][] createIndexArray()
     {
         //Index our voxels
         int[][][] indexArray = new int[this.getWidth()][this.getHeight()][this.getDepth()];
@@ -189,6 +193,18 @@ public class ONETexture extends ONEObject
             
             indexArray[x][y][z] = i+1;
         }
+        
+        return(indexArray);
+    }
+    /**
+     * Adds the given texture to this one (cell index by cell index)
+     *
+     * @param tex
+     */
+    public void add(ONETexture tex) throws Exception
+    {
+        //Index our voxels
+        int[][][] indexArray = this.createIndexArray();
         
         for (int i = 0; i < tex.getVoxels().size(); i++)
         {
@@ -206,8 +222,7 @@ public class ONETexture extends ONEObject
             int index = indexArray[x][y][z]-1;
             if (index < 0)
             {
-                ONEVoxel newVoxel = this.newVoxel();
-                newVoxel.setIndex(v1.getIndex()[0], v1.getIndex()[1], v1.getIndex()[2]);
+                ONEVoxel newVoxel = this.newVoxel(v1.getIndex()[0], v1.getIndex()[1], v1.getIndex()[2]);
                 newVoxel.setColor(v1.getR(), v1.getG(), v1.getB(), v1.getA());
                 this.getVoxels().add(newVoxel);
                 indexArray[x][y][z] = this.voxelList.size();
@@ -239,6 +254,17 @@ public class ONETexture extends ONEObject
         }
 
         return (null);
+    }
+    
+    /**
+     * Returns the voxel with the given index in the list
+     */
+    public ONEVoxel getVoxel(int index)
+    {
+        if(index < 0 || index >= this.voxelList.size())
+            return(null);
+        
+        return(this.voxelList.get(index));
     }
 
     //--------------------------------------------------------------------------

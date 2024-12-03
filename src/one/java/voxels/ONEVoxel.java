@@ -49,7 +49,10 @@ public abstract class ONEVoxel<T extends Number>
      */
     public boolean isZero()
     {        
-        return (getR().doubleValue() == 0 && getG().doubleValue() == 0 && getB().doubleValue() == 0 && getA().doubleValue() == 0);
+        return (getR().doubleValue() == 0 
+                && getG().doubleValue() == 0 
+                && getB().doubleValue() == 0 
+                && getA().doubleValue() == 0);
     }
 
     /**
