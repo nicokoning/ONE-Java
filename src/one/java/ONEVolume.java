@@ -25,6 +25,7 @@ public class ONEVolume extends ONEObject
         this.addParameter("OFFSET_Z", "0");
         
         this.addParameter("ORDER", "0");
+        this.addParameter("REPLACE", "0");
     } //end of constructor
     
     public void dispose()
@@ -72,7 +73,7 @@ public class ONEVolume extends ONEObject
         return (this.getDoubleParameter("EMISSION"));
 
     }
-    
+        
      /**
      * Sets the opacity parameter
      */ 
