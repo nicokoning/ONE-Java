@@ -50,6 +50,15 @@ public class ONEVolume extends ONEObject
             this.removeParameter("SCALE");
         }
     }
+    
+    /**
+     * Copies the given volume to this one
+     */
+    public void copy(ONEVolume volume)
+    {
+        this.copyHeader(volume);
+        this.setID(volume.getID());
+    }
 
     /**
      * Sets the emission parameter

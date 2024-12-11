@@ -66,6 +66,16 @@ public class ONETexture extends ONEObject
             this.setSize(res, res, res);
         }
     }
+    
+     
+    /**
+     * Copies the given volume to this one
+     */
+    public void copy(ONETexture texture)
+    {
+        this.copyHeader(texture);
+        this.setID(texture.getID());
+    }
 
     /**
      * Returns true if there are no voxels in this texture

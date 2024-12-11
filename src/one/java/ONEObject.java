@@ -42,7 +42,6 @@ public abstract class ONEObject implements Serializable
     public void dispose()
     {
         support.clear();
-        this.support = null;
     }
 
     private void initializeTransient()
@@ -59,7 +58,7 @@ public abstract class ONEObject implements Serializable
     {
         support.removeChangeListener(l);
     }
-
+    
     /**
      * Copies the header info from the object to this object
      *
@@ -130,7 +129,8 @@ public abstract class ONEObject implements Serializable
 
     protected void fireChangeEvent(ONEChangeEvent event)
     {
-        this.support.fireChangeEvent(event);
+        if(this.support != null)
+            this.support.fireChangeEvent(event);
     }
 
     /**

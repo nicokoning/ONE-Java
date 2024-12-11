@@ -82,6 +82,34 @@ public abstract class ONEScene<V extends ONEVolume, T extends ONETexture> extend
             this.volumes.get(i).addChangeListener(changeListener);
 
     } //end of initialize function
+    
+    /**
+     * Copies the given scene to this one
+     */ 
+    public void copy(ONEScene<V,T> scene)
+    {
+        this.clear();
+        
+        //Copy our header
+        this.copyHeader(scene);
+        
+        for(int i = 0; i < scene.getVolumes().size(); i++)
+        {
+            V volume = scene.getVolumes().get(i);
+            V newVolume = this.newVolume();
+            newVolume.copy(volume);
+            this.add(newVolume);            
+        }
+        
+        for(int i = 0; i < scene.getTextures().size(); i++)
+        {
+            T texture = scene.getTextures().get(i);
+            T newTexture = this.newTexture();
+            newTexture.copy(texture);
+            this.add(newTexture);            
+        }
+        
+    }
 
     /**
      * Sorts the volumes according to order.
@@ -102,6 +130,7 @@ public abstract class ONEScene<V extends ONEVolume, T extends ONETexture> extend
     @Override
     protected Object readResolve()
     {
+        super.readResolve();
         this.initializeTransient();
         return (this);
     }
@@ -162,46 +191,46 @@ public abstract class ONEScene<V extends ONEVolume, T extends ONETexture> extend
 
     }
 
-    public void add(V v)
+    public void add(V volume)
     {
         //If it already exists (same ID) replace it
-        int index = volumes.indexOf(v);
+        int index = volumes.indexOf(volume);
 
         if (index >= 0)
         {
             ONEVolume currentVolume = volumes.get(index);
-            currentVolume.copyHeader(v);
+            currentVolume.copyHeader(volume);
         }
         else
         {
-            this.volumes.add(v);
+            this.volumes.add(volume);
         }
 
         //Listen for property changes
-        v.addChangeListener(changeListener);
+        volume.addChangeListener(changeListener);
         this.sortVolumes();
         
-        this.fireChangeEvent(new ONEChangeEvent(this, ONEChangeEventType.STRUCTURE_CHANGED, "", null, v));
+        this.fireChangeEvent(new ONEChangeEvent(this, ONEChangeEventType.STRUCTURE_CHANGED, "", null, volume));
     }
 
-    public void add(T t)
+    public void add(T texture)
     {
         //If it already exists (same ID) replace it
-        int index = textures.indexOf(t);
+        int index = textures.indexOf(texture);
 
         if (index >= 0)
         {
             T currentTexture = textures.get(index);
-            currentTexture.copyHeader(t);
+            currentTexture.copyHeader(texture);
         }
         else
         {
-            this.textures.add(t);
+            this.textures.add(texture);
         }
 
         //Listen for property changes
-        t.addChangeListener(changeListener);
-        this.fireChangeEvent(new ONEChangeEvent(this, ONEChangeEventType.STRUCTURE_CHANGED, "", null, t));
+        texture.addChangeListener(changeListener);
+        this.fireChangeEvent(new ONEChangeEvent(this, ONEChangeEventType.STRUCTURE_CHANGED, "", null, texture));
     }
 
     public void remove(ONEObject o)
