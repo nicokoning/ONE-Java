@@ -1,4 +1,3 @@
-
 package one.java.io;
 
 import java.io.BufferedInputStream;
@@ -6,6 +5,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import one.java.ONETexture;
 
 /**
  *
@@ -13,6 +13,7 @@ import java.nio.charset.StandardCharsets;
  */
 public class ONEByteReader
 {
+
     protected ByteBuffer buffer;
 
     public static final int BYTE_SIZE = 1;
@@ -35,6 +36,20 @@ public class ONEByteReader
         this.setBuffer(buffer);
     }
 
+    public static int getByteSize(ONETexture.ONE_TEXTURE_TYPE type)
+    {
+        if (type.equals(ONETexture.ONE_TEXTURE_TYPE.RGBA_BYTE))
+        {
+            return (BYTE_SIZE);
+        }
+        if (type.equals(ONETexture.ONE_TEXTURE_TYPE.RGBA_FLOAT))
+        {
+            return (FLOAT_SIZE);
+        }
+
+        return (0);
+    }
+
     public void setByteOrder(ByteOrder order)
     {
         this.buffer.order(order);
@@ -54,6 +69,21 @@ public class ONEByteReader
     public boolean hasNext()
     {
         return (getBuffer().remaining() > 0);
+    }
+
+    public final Number next(ONETexture.ONE_TEXTURE_TYPE type)
+    {
+        if (type.equals(ONETexture.ONE_TEXTURE_TYPE.RGBA_BYTE))
+        {
+            return (this.nextByte());
+        }
+        else if (type.equals(ONETexture.ONE_TEXTURE_TYPE.RGBA_FLOAT))
+        {
+            return (this.nextFloat());
+        }
+
+        return (0);
+
     }
 
     public final byte nextByte()
@@ -115,9 +145,11 @@ public class ONEByteReader
 
     public final void setBuffer(ByteBuffer buffer)
     {
-        if(this.buffer != null)
+        if (this.buffer != null)
+        {
             this.buffer.clear();
-        
+        }
+
         this.buffer = buffer;
     }
 
