@@ -143,7 +143,7 @@ public class ONEFileReader
     {
         long textureID = ONEByteReader.nextLong(stream);
         if (textureID != texture.getID())
-        {
+        {            
             throw new Exception("Texture ID of data (" + textureID + ") does not match texture ID of object to read (" + texture.getID() + ").");
         }
 
