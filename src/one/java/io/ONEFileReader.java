@@ -180,6 +180,9 @@ public class ONEFileReader
         this.taskMonitor.add(task);
         try
         {
+            double maxGrey = 0;
+            double maxA = 0;
+            
             while (bytesRead < bytesToRead)
             {
                 //Figure out how many bytes we should read, make sure we don't read too many
@@ -198,11 +201,16 @@ public class ONEFileReader
                     System.arraycopy(buffer, j * voxelByteSize, voxelBuffer, 0, voxelBuffer.length);
                     byteReader.setBytes(voxelBuffer);
                     voxel.read(byteReader);
+                    
+                    maxGrey = Math.max(maxGrey, voxel.getGrey());
+                    maxA = Math.max(maxA, voxel.getA().doubleValue());
                     voxelList.add(voxel);
                 }
 
                 task.addCurentSteps(readVoxels);
             }
+            texture.setParameter("MAX_GREY", "" + maxGrey);
+            texture.setParameter("MAX_A", "" + maxA);
         }
         finally
         {
