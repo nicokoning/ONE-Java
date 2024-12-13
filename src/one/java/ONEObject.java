@@ -60,6 +60,26 @@ public abstract class ONEObject implements Serializable
     }
     
     /**
+     * Sets the new list of parameters for this, clears anything else that isn't in the new list
+     * @param params 
+     */
+    public void copyParameters(ArrayList<ONEParameter> params)
+    {
+        //Purge any parameters that are not in the new object params
+        for(int i = 0; i < this.parameters.size(); i++)
+        {
+            ONEParameter tParam = this.parameters.get(i);
+            if(!params.contains(tParam))
+                this.parameters.remove(i--);            
+        }
+        
+        for (int i = 0; i < params.size(); i++)
+        {
+            ONEParameter param = params.get(i);
+            this.setParameter(param.key, param.value);
+        }
+    }
+    /**
      * Copies the header info from the object to this object
      *
      * @param object
@@ -67,12 +87,8 @@ public abstract class ONEObject implements Serializable
     public void copyHeader(ONEObject object)
     {
         this.setName(object.getName());
-        this.parameters.clear();
-        for (int i = 0; i < object.getParameters().size(); i++)
-        {
-            ONEParameter param = object.getParameters().get(i);
-            this.setParameter(param.key, param.value);
-        }
+        
+        this.copyParameters(object.getParameters());
     }
 
     /**

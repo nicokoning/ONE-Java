@@ -292,8 +292,13 @@ public class ONEFileReader
         scene.setName(sceneName);
 
         //Read in the parameters for the scene
-        scene.getParameters().clear();
-        scene.getParameters().addAll(this.readParameters(raf));
+        scene.copyParameters(this.readParameters(raf));
+        
+        ArrayList<ONEVolume> currentVolumes = new ArrayList<>(scene.getVolumes());
+        ArrayList<ONETexture> currentTextures = new ArrayList<>(scene.getTextures());
+        
+        ArrayList<ONEVolume> newVolumes = new ArrayList<>();
+        ArrayList<ONETexture> newTextures = new ArrayList<>();        
 
         //VOLUMES
         {
@@ -302,7 +307,7 @@ public class ONEFileReader
             {
                 ONEVolume volume = scene.newVolume();
                 this.read(volume, raf, version);
-                scene.add(volume);
+                newVolumes.add(volume);                
             }
         }
 
@@ -313,9 +318,31 @@ public class ONEFileReader
             {
                 ONETexture texture = scene.newTexture();
                 this.read(texture, raf, version);
-                scene.add(texture);
+                newTextures.add(texture);
             }
         }
+        
+        //Purge our current list
+        for(int i = 0; i < currentVolumes.size(); i++)
+        {
+            ONEVolume cVolume = currentVolumes.get(i);
+            if(!newVolumes.contains(cVolume))
+                scene.remove(cVolume);            
+        }
+        
+        for(int i = 0; i < currentTextures.size(); i++)
+        {
+            ONETexture cTexture = currentTextures.get(i);
+            if(!newTextures.contains(cTexture))
+                scene.remove(cTexture);            
+        }
+        
+        //Now set the new ones
+        for(int i = 0; i < newVolumes.size(); i++)
+            scene.add(newVolumes.get(i));
+        
+         for(int i = 0; i < newTextures.size(); i++)
+            scene.add(newTextures.get(i));
     }
     
     /**

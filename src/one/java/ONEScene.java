@@ -62,60 +62,64 @@ public abstract class ONEScene<V extends ONEVolume, T extends ONETexture> extend
     private void initializeTransient()
     {
         this.sortVolumes();
-        
+
         this.changeListener = (ONEChangeEvent evt) ->
         {
             //If the order of a volume has changed, resort
-            if(evt.getSource() instanceof ONEVolume && evt.getParameterName().equalsIgnoreCase("ORDER"))
+            if (evt.getSource() instanceof ONEVolume && evt.getParameterName().equalsIgnoreCase("ORDER"))
             {
                 this.sortVolumes();
             }
-            
+
             this.fireChangeEvent(evt); //just propogate the event to any listeners
-        };        
-        
+        };
+
         //Add the listener to all our children
-        for(int i = 0; i < this.textures.size(); i++)
+        for (int i = 0; i < this.textures.size(); i++)
+        {
             this.textures.get(i).addChangeListener(changeListener);
-        
-        for(int i = 0; i < this.volumes.size(); i++)
+        }
+
+        for (int i = 0; i < this.volumes.size(); i++)
+        {
             this.volumes.get(i).addChangeListener(changeListener);
+        }
 
     } //end of initialize function
-    
+
     /**
      * Copies the given scene to this one
-     */ 
-    public void copy(ONEScene<V,T> scene)
+     */
+    public void copy(ONEScene<V, T> scene)
     {
         this.clear();
-        
+
         //Copy our header
         this.copyHeader(scene);
-        
-        for(int i = 0; i < scene.getVolumes().size(); i++)
+
+        for (int i = 0; i < scene.getVolumes().size(); i++)
         {
             V volume = scene.getVolumes().get(i);
             V newVolume = this.newVolume();
             newVolume.copy(volume);
-            this.add(newVolume);            
+            this.add(newVolume);
         }
-        
-        for(int i = 0; i < scene.getTextures().size(); i++)
+
+        for (int i = 0; i < scene.getTextures().size(); i++)
         {
             T texture = scene.getTextures().get(i);
             T newTexture = this.newTexture();
             newTexture.copy(texture);
-            this.add(newTexture);            
+            this.add(newTexture);
         }
-        
+
     }
 
     /**
      * Sorts the volumes according to order.
      */
     protected void sortVolumes()
-    {        
+    {
         this.volumes.sort((V o1, V o2) -> (Integer.compare(o1.getOrder(), o2.getOrder())));
         this.fireChangeEvent(new ONEChangeEvent(this, ONEChangeEventType.STRUCTURE_CHANGED, "SORTED", null, volumes));
     }
@@ -188,7 +192,6 @@ public abstract class ONEScene<V extends ONEVolume, T extends ONETexture> extend
         {
             this.add((V) o);
         }
-
     }
 
     public void add(V volume)
@@ -200,17 +203,16 @@ public abstract class ONEScene<V extends ONEVolume, T extends ONETexture> extend
         {
             ONEVolume currentVolume = volumes.get(index);
             currentVolume.copyHeader(volume);
-        }
-        else
-        {
-            this.volumes.add(volume);
+            return;
         }
 
+        this.volumes.add(volume);
         //Listen for property changes
         volume.addChangeListener(changeListener);
         this.sortVolumes();
-        
+
         this.fireChangeEvent(new ONEChangeEvent(this, ONEChangeEventType.STRUCTURE_CHANGED, "", null, volume));
+
     }
 
     public void add(T texture)
@@ -222,15 +224,13 @@ public abstract class ONEScene<V extends ONEVolume, T extends ONETexture> extend
         {
             T currentTexture = textures.get(index);
             currentTexture.copyHeader(texture);
+            return;
         }
-        else
-        {
-            this.textures.add(texture);
-        }
-
+        this.textures.add(texture);
         //Listen for property changes
         texture.addChangeListener(changeListener);
         this.fireChangeEvent(new ONEChangeEvent(this, ONEChangeEventType.STRUCTURE_CHANGED, "", null, texture));
+
     }
 
     public void remove(ONEObject o)
@@ -254,6 +254,7 @@ public abstract class ONEScene<V extends ONEVolume, T extends ONETexture> extend
     public void remove(V volume)
     {
         this.volumes.remove(volume);
+        volume.removeChangeListener(changeListener);
         this.fireChangeEvent(new ONEChangeEvent(this, ONEChangeEventType.STRUCTURE_CHANGED, "", volume, null));
         volume.dispose(); //do this after the fire event
     }
@@ -271,6 +272,7 @@ public abstract class ONEScene<V extends ONEVolume, T extends ONETexture> extend
             volume.removeTextureIDs(texture.getID());
         }
 
+        texture.removeChangeListener(changeListener);
         this.fireChangeEvent(new ONEChangeEvent(this, ONEChangeEventType.STRUCTURE_CHANGED, "", texture, null));
         texture.dispose(); //do this after the fire event
     }
