@@ -58,27 +58,32 @@ public abstract class ONEObject implements Serializable
     {
         support.removeChangeListener(l);
     }
-    
+
     /**
-     * Sets the new list of parameters for this, clears anything else that isn't in the new list
-     * @param params 
+     * Sets the new list of parameters for this, clears anything else that isn't
+     * in the new list
+     *
+     * @param params
      */
     public void copyParameters(ArrayList<ONEParameter> params)
     {
         //Purge any parameters that are not in the new object params
-        for(int i = 0; i < this.parameters.size(); i++)
+        for (int i = 0; i < this.parameters.size(); i++)
         {
             ONEParameter tParam = this.parameters.get(i);
-            if(!params.contains(tParam))
-                this.parameters.remove(i--);            
+            if (!params.contains(tParam))
+            {
+                this.parameters.remove(i--);
+            }
         }
-        
+
         for (int i = 0; i < params.size(); i++)
         {
             ONEParameter param = params.get(i);
             this.setParameter(param.key, param.value);
         }
     }
+
     /**
      * Copies the header info from the object to this object
      *
@@ -87,7 +92,7 @@ public abstract class ONEObject implements Serializable
     public void copyHeader(ONEObject object)
     {
         this.setName(object.getName());
-        
+
         this.copyParameters(object.getParameters());
     }
 
@@ -112,6 +117,41 @@ public abstract class ONEObject implements Serializable
     public String toString()
     {
         return (this.getName());
+    }
+
+    /**
+     * Returns true if the header from the given object matches this one. I.e.
+     * all parameters are the same, same ID etc
+     *
+     * @param o
+     * @return
+     */
+    protected boolean matches(ONEObject o)
+    {
+        if(o == null)
+            return(false);
+        
+        if (o.getID() != this.getID())
+        {
+            return (false);
+        }
+
+        if (this.getParameters().size() != o.getParameters().size())
+        {
+            return (false);
+        }
+
+        for (int i = 0; i < this.getParameters().size(); i++)
+        {
+            ONEParameter p = this.getParameters().get(i);
+            String sP = o.getParameter(p.getKey());
+            if (!p.getValue().equals(sP))
+            {
+                return (false);
+            }
+        }
+
+        return (true);
     }
 
     /**
@@ -145,8 +185,10 @@ public abstract class ONEObject implements Serializable
 
     protected void fireChangeEvent(ONEChangeEvent event)
     {
-        if(this.support != null)
+        if (this.support != null)
+        {
             this.support.fireChangeEvent(event);
+        }
     }
 
     /**

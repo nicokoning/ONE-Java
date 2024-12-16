@@ -86,6 +86,46 @@ public abstract class ONEScene<V extends ONEVolume, T extends ONETexture> extend
         }
 
     } //end of initialize function
+    
+    /**
+     * Returns true if this header matches the one given
+     * @param s
+     * @return 
+     */ 
+    @Override
+    protected boolean matches(ONEObject o)
+    {
+        if(!super.matches(o) || !(o instanceof ONEScene))
+            return(false);
+        
+        ONEScene s = (ONEScene)o;
+        
+        //Check each volume and texture
+        if(this.getVolumes().size() != s.getVolumes().size())
+            return(false);
+        if(this.getTextures().size() != s.getTextures().size())
+            return(false);        
+                
+        for(int i = 0; i < this.getVolumes().size(); i++)
+        {
+            ONEVolume v = this.getVolumes().get(i);
+            ONEVolume sV = s.getVolume(v.getID());
+            if(!v.matches(sV))            
+                return(false);
+        }
+        
+        for(int i = 0; i < this.getTextures().size(); i++)
+        {
+            ONETexture t = this.getTextures().get(i);
+            ONETexture sT = s.getTexture(t.getID());
+            if(!t.matches(sT))            
+                return(false);
+        }
+        
+        //Passed all the tests
+        return(true);
+    }
+
 
     /**
      * Copies the given scene to this one
