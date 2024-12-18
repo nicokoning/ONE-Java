@@ -7,13 +7,14 @@ import one.java.io.ONEByteWriter;
  *
  * @author Nico
  */
-public class ONEByteVoxel extends ONEVoxel<Byte>
+public class ONEByteVoxel extends ONEVoxel<Integer>
 {
 
     //The serial version for deserializing
     private static final long serialVersionUID = 1L;
 
-    private byte r, g, b, a;
+    //use ints as the backing type so we can have unsigned bytes
+    private int r, g, b, a;
 
     @Override
     public ONEVoxel copy()
@@ -38,10 +39,10 @@ public class ONEByteVoxel extends ONEVoxel<Byte>
         writer.writeInt(this.yIndex);
         writer.writeInt(this.zIndex);
 
-        writer.writeByte(this.r);
-        writer.writeByte(this.g);
-        writer.writeByte(this.b);
-        writer.writeByte(this.a);
+        writer.writeByte((byte)this.r);
+        writer.writeByte((byte)this.g);
+        writer.writeByte((byte)this.b);
+        writer.writeByte((byte)this.a);
 
     }
 
@@ -52,10 +53,11 @@ public class ONEByteVoxel extends ONEVoxel<Byte>
         this.yIndex = reader.nextInt();
         this.zIndex = reader.nextInt();
 
-        this.r = reader.nextByte();
-        this.g = reader.nextByte();
-        this.b = reader.nextByte();
-        this.a = reader.nextByte();
+        //This converts the incoming byte to integer so we can represent unsigned bytes
+        this.r = reader.nextByte() & 0xff; 
+        this.g = reader.nextByte() & 0xff;
+        this.b = reader.nextByte() & 0xff;
+        this.a = reader.nextByte() & 0xff;
     }
 
     @Override
@@ -70,32 +72,32 @@ public class ONEByteVoxel extends ONEVoxel<Byte>
     @Override
     public void addColor(Number r, Number g, Number b, Number a)
     {
-        this.r += r.byteValue();
-        this.g += g.byteValue();
-        this.b += b.byteValue();
-        this.a += a.byteValue();
+        this.r += r.intValue();
+        this.g += g.intValue();
+        this.b += b.intValue();
+        this.a += a.intValue();
     }
 
     @Override
-    public Byte getR()
+    public Integer getR()
     {
         return (r);
     }
 
     @Override
-    public Byte getG()
+    public Integer getG()
     {
         return (g);
     }
 
     @Override
-    public Byte getB()
+    public Integer getB()
     {
         return (b);
     }
 
     @Override
-    public Byte getA()
+    public Integer getA()
     {
         return (a);
     }
@@ -103,24 +105,31 @@ public class ONEByteVoxel extends ONEVoxel<Byte>
     @Override
     public void setR(Number r)
     {
-        this.r = r.byteValue();
+        this.r = r.intValue();
     }
 
     @Override
     public void setG(Number g)
     {
-        this.g = g.byteValue();
+        this.g = g.intValue();
     }
 
     @Override
     public void setB(Number b)
     {
-        this.b = b.byteValue();
+        this.b = b.intValue();
     }
 
     @Override
     public void setA(Number a)
     {
-        this.a = a.byteValue();
+        this.a = a.intValue();
+    }
+
+    @Override
+    public Integer getGrey()
+    {          
+        int grey = (int)((r + g + b) / 3.0);
+        return(grey);
     }
 }

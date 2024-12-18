@@ -202,7 +202,7 @@ public class ONEFileReader
                     byteReader.setBytes(voxelBuffer);
                     voxel.read(byteReader);
                     
-                    maxGrey = Math.max(maxGrey, voxel.getGrey());
+                    maxGrey = Math.max(maxGrey, (int)voxel.getGrey());
                     maxA = Math.max(maxA, voxel.getA().doubleValue());
                     voxelList.add(voxel);
                 }

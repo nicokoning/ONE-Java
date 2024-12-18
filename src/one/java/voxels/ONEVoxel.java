@@ -154,10 +154,7 @@ public abstract class ONEVoxel<T extends Number>
     /**
      * Returns the grey value (r+g+b)/3 for the voxel
      */
-    public double getGrey()
-    {
-        return ((this.getR().doubleValue() + this.getG().doubleValue() + this.getB().doubleValue()) / 3.0);
-    }
+    public abstract T getGrey();
 
     /**
      * @return the r

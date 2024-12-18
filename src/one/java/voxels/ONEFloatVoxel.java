@@ -131,4 +131,11 @@ public class ONEFloatVoxel extends ONEVoxel<Float>
     {
         this.a = a.floatValue();
     }
+
+    @Override
+    public Float getGrey()
+    {
+        float grey = (this.getR() + this.getG() + this.getB()) / 3.0f;
+        return(grey);
+    }
 }
