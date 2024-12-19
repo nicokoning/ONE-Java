@@ -253,6 +253,9 @@ public class ONEFileReader
         }
 
         long fileSize = file.length();
+        if(fileSize <= 0)
+               throw new Exception("Unable to read ONE header from: " + filename + ". The file has 0 size.");
+        
         RandomAccessFile raf = new RandomAccessFile(filename, "r");
 
         try
