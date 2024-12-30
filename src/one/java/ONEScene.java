@@ -95,7 +95,10 @@ public abstract class ONEScene<V extends ONEVolume, T extends ONETexture> extend
     @Override
     protected boolean matches(ONEObject o)
     {
-        if(!super.matches(o) || !(o instanceof ONEScene))
+        if(!(o instanceof ONEScene))
+            return(false);
+        
+        if(!super.matches(o))
             return(false);
         
         ONEScene s = (ONEScene)o;
@@ -136,6 +139,7 @@ public abstract class ONEScene<V extends ONEVolume, T extends ONETexture> extend
 
         //Copy our header
         this.copyHeader(scene);
+        this.setID(scene.getID());
 
         for (int i = 0; i < scene.getVolumes().size(); i++)
         {

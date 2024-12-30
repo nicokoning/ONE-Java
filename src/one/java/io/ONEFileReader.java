@@ -256,10 +256,12 @@ public class ONEFileReader
         if(fileSize <= 0)
                throw new Exception("Unable to read ONE header from: " + filename + ". The file has 0 size.");
         
-        RandomAccessFile raf = new RandomAccessFile(filename, "r");
+        RandomAccessFile raf = null;
+        
 
         try
         {
+            raf = new RandomAccessFile(filename, "r");
             //Move to the last INT in the file, this will represent the header length
             raf.seek(fileSize - ONEByteReader.LONG_SIZE);
             long headerLength = raf.readLong();
@@ -274,7 +276,8 @@ public class ONEFileReader
         }
         finally
         {
-            raf.close();
+            if(raf != null)
+                raf.close();
         }
     }
 
