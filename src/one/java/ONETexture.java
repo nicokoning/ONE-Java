@@ -19,6 +19,11 @@ public class ONETexture extends ONEObject
     {
         RGBA_BYTE, RGBA_FLOAT
     }
+    
+    public enum ONE_TEXTURE_CONTENT_TYPE
+    {
+        VOLUME, PROCEDURAL
+    }
 
     //The serial version for deserializing
     private static final long serialVersionUID = 1L;
@@ -302,6 +307,23 @@ public class ONETexture extends ONEObject
     public final void setType(ONE_TEXTURE_TYPE type)
     {
         this.setParameter("TYPE", type.name());
+    }
+    
+    /**
+     * @param type the type to set
+     */
+    public final void setContentType(ONE_TEXTURE_CONTENT_TYPE type)
+    {
+        this.setParameter("CONTENT_TYPE", type.name());
+    }
+    
+    public ONE_TEXTURE_CONTENT_TYPE getContentType()
+    {
+        String param = this.getParameter("CONTENT_TYPE");
+        if(param == null)
+            return(ONE_TEXTURE_CONTENT_TYPE.VOLUME);
+        
+        return(ONE_TEXTURE_CONTENT_TYPE.valueOf(param));
     }
 
     /**
