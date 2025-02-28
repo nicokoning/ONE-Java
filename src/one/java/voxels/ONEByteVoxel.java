@@ -9,7 +9,6 @@ import one.java.io.ONEByteWriter;
  */
 public class ONEByteVoxel extends ONEVoxel<Integer>
 {
-
     //The serial version for deserializing
     private static final long serialVersionUID = 1L;
 

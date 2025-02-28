@@ -10,6 +10,7 @@ import one.java.events.ONEChangeEvent;
 import one.java.events.ONEChangeEventType;
 import one.java.events.ONEChangeListener;
 import one.java.events.ONEChangeSupport;
+import one.java.utils.ObjectSerializer;
 
 /**
  *
@@ -42,6 +43,11 @@ public abstract class ONEObject implements Serializable
     public void dispose()
     {
         support.clear();
+    }
+    
+    public ONEObject copy()
+    {
+        return(ONEObject)ObjectSerializer.deepCopy(this);
     }
 
     private void initializeTransient()

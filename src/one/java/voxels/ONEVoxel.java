@@ -4,6 +4,10 @@
  */
 package one.java.voxels;
 
+import java.io.Serializable;
+import one.java.ONETexture.ONE_TEXTURE_TYPE;
+import static one.java.ONETexture.ONE_TEXTURE_TYPE.RGBA_BYTE;
+import static one.java.ONETexture.ONE_TEXTURE_TYPE.RGBA_FLOAT;
 import one.java.io.ONEByteReader;
 import one.java.io.ONEByteWriter;
 
@@ -11,11 +15,32 @@ import one.java.io.ONEByteWriter;
  *
  * @author Nico
  */
-public abstract class ONEVoxel<T extends Number>
+public abstract class ONEVoxel<T extends Number> implements Serializable
 {
+    //The serial version for deserializing
+    private static final long serialVersionUID = 1L;
+    
     protected int xIndex;
     protected int yIndex;
     protected int zIndex;
+
+    public static ONEVoxel newVoxel(ONE_TEXTURE_TYPE type) throws Exception
+    {
+        switch (type)
+        {
+            case RGBA_FLOAT ->
+            {
+                return (new ONEFloatVoxel());
+            }
+            case RGBA_BYTE ->
+            {
+                return (new ONEByteVoxel());
+            }
+
+            default ->
+                throw new Exception("Voxel type is unknown.");
+        }
+    }
 
     /**
      * Creates a new ONEVoxel object
@@ -48,10 +73,10 @@ public abstract class ONEVoxel<T extends Number>
      * Returns true if all the components of the voxel are 0
      */
     public boolean isZero()
-    {        
-        return (getR().doubleValue() == 0 
-                && getG().doubleValue() == 0 
-                && getB().doubleValue() == 0 
+    {
+        return (getR().doubleValue() == 0
+                && getG().doubleValue() == 0
+                && getB().doubleValue() == 0
                 && getA().doubleValue() == 0);
     }
 
@@ -75,10 +100,9 @@ public abstract class ONEVoxel<T extends Number>
             return (false);
         }
 
-        if (!(
-                this.getR().equals(v.getR()) 
-                && this.getG().equals(v.getG()) 
-                && this.getB().equals(v.getB()) 
+        if (!(this.getR().equals(v.getR())
+                && this.getG().equals(v.getG())
+                && this.getB().equals(v.getB())
                 && this.getA().equals(v.getA())))
         {
             return (false);
@@ -97,7 +121,7 @@ public abstract class ONEVoxel<T extends Number>
     /**
      * Returns the size of the voxel in bytes for storage and reading purposes
      */
-    public final int sizeInBytes()
+    public int sizeInBytes()
     {
         int size = 3 * ONEByteReader.INT_SIZE + 4 * dataByteSize();
         return (size);

@@ -172,6 +172,7 @@ public class ONEFileReader
 
         //The list of voxels we add to
         ArrayList<ONEVoxel> voxelList = texture.getVoxels();
+        
         //Grow the array here, once
         voxelList.ensureCapacity(voxelList.size() + numVoxels);
 
@@ -211,6 +212,7 @@ public class ONEFileReader
             }
             texture.setParameter("MAX_GREY", "" + maxGrey);
             texture.setParameter("MAX_A", "" + maxA);
+            texture.setVoxels(voxelList);
         }
         finally
         {

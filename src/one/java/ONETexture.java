@@ -5,8 +5,6 @@
 package one.java;
 
 import java.util.ArrayList;
-import one.java.voxels.ONEByteVoxel;
-import one.java.voxels.ONEFloatVoxel;
 import one.java.voxels.ONEVoxel;
 
 /**
@@ -22,14 +20,14 @@ public class ONETexture extends ONEObject
     
     public enum ONE_TEXTURE_CONTENT_TYPE
     {
-        VOLUME, PROCEDURAL
+        VOLUME, PROCEDURAL, DATA
     }
 
     //The serial version for deserializing
     private static final long serialVersionUID = 1L;
 
     //List of non-zero voxels
-    protected ArrayList<ONEVoxel> voxelList = new ArrayList<>();
+    private ArrayList<ONEVoxel> voxelList = new ArrayList<>();
 
     /**
      * Creates a new ONETexture object of the given type
@@ -80,8 +78,8 @@ public class ONETexture extends ONEObject
     {
         this.copyHeader(texture);
         this.setID(texture.getID());
-    }
-
+    }    
+    
     /**
      * Returns true if there are no voxels in this texture
      */
@@ -118,7 +116,7 @@ public class ONETexture extends ONEObject
      * Removes all zero voxels
      */
     public void purge()
-    {
+    {        
         for (int i = 0; i < this.voxelList.size(); i++)
         {
             ONEVoxel v = this.voxelList.get(i);
@@ -134,23 +132,7 @@ public class ONETexture extends ONEObject
      */
     public ONEVoxel newVoxel(int x, int y, int z) throws Exception
     {
-        ONEVoxel v = null;
-        
-        switch (this.getType())
-        {
-            case RGBA_FLOAT ->
-            {
-                v = (new ONEFloatVoxel());
-            }
-            case RGBA_BYTE ->
-            {
-                v = (new ONEByteVoxel());
-            }
-
-            default ->
-                throw new Exception("Voxel type is unknown.");
-        }
-        
+        ONEVoxel v = ONEVoxel.newVoxel(this.getType());        
         v.setIndex(x, y, z);
         return(v);
     }
@@ -358,6 +340,14 @@ public class ONETexture extends ONEObject
         this.setParameter("WIDTH", Integer.toString(width));
         this.setParameter("HEIGHT", Integer.toString(height));
         this.setParameter("DEPTH", Integer.toString(depth));
+    }
+
+    /**
+     * @param voxelList the voxelList to set
+     */
+    public void setVoxels(ArrayList<ONEVoxel> voxelList)
+    {
+        this.voxelList = voxelList;
     }
 
 } //end of ONETexture class

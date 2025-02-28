@@ -152,8 +152,7 @@ public abstract class ONEScene<V extends ONEVolume, T extends ONETexture> extend
         for (int i = 0; i < scene.getTextures().size(); i++)
         {
             T texture = scene.getTextures().get(i);
-            T newTexture = this.newTexture();
-            newTexture.copy(texture);
+            T newTexture = (T)texture.copy();
             this.add(newTexture);
         }
 
@@ -283,12 +282,12 @@ public abstract class ONEScene<V extends ONEVolume, T extends ONETexture> extend
         {
             return;
         }
-
-        if (this.newTexture().getClass().equals(o.getClass()))
+        
+        if(this.newTexture().getClass().isAssignableFrom(o.getClass()))
         {
             this.remove((T) o);
         }
-        else if (this.newVolume().getClass().equals(o.getClass()))
+        else if (this.newVolume().getClass().isAssignableFrom(o.getClass()))
         {
             this.remove((V) o);
         }
