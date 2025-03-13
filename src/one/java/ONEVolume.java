@@ -1,6 +1,8 @@
 package one.java;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  *
@@ -274,28 +276,40 @@ public class ONEVolume extends ONEObject
         //First clear all the IDs
         this.clearTextureIDs();
 
+        int num = 0;
         for (int i = 0; i < ids.length; i++)
         {
-            String key = "TEXTURE_ID_" + i;
+             if(ids[i] == 0)
+                continue;
+             
+            String key = "TEXTURE_ID_" + num++;
             this.setParameter(key, "" + ids[i]);
         }
     }
     
-    public void removeTextureIDs(long... ids)
-    {        
-        for (int i = 0; i < ids.length; i++)
+    public void removeTextureIDs(long... toRemoveIds)
+    {           
+        long[] currentIDs = this.getTextureIDs();
+        
+        for(int i = 0; i < toRemoveIds.length; i++)
         {
-            String key = "TEXTURE_ID_" + i;
-            this.removeParameter(key);
+            long rID = toRemoveIds[i];
+            for(int j = 0; j < currentIDs.length; j++)
+            {
+                currentIDs[j] = currentIDs[j] == rID ? 0 : currentIDs[j]; //replace with a 0 if it does not exist
+            }
         }
+        
+        this.setTextureIDs(currentIDs);
     }
-
+    
     /**
      * Adds the given texture IDs to this volume mapping
      * @param ids 
      */
     public void addTextureIDs(long... ids)
     {
+     
         //Get the starting texture ID        
         int num = 0;
         while (true)
@@ -312,7 +326,10 @@ public class ONEVolume extends ONEObject
 
         for (int i = 0; i < ids.length; i++)
         {
-            String key = "TEXTURE_ID_" + (num + i);
+            if(ids[i] == 0)
+                continue;
+            
+            String key = "TEXTURE_ID_" + (num++);
             this.setParameter(key, "" + ids[i]);
         }
     }

@@ -70,6 +70,21 @@ public class ONETexture extends ONEObject
         }
     }
     
+    public void setWidth(int w)
+    {
+        this.setParameter("WIDTH", ""+w);
+    }
+    
+     public void setHeight(int h)
+    {
+        this.setParameter("HEIGHT", ""+h);
+    }
+     
+      public void setDepth(int d)
+    {
+        this.setParameter("DEPTH", ""+d);
+    }
+    
      
     /**
      * Copies the given volume to this one

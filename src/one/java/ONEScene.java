@@ -70,6 +70,11 @@ public abstract class ONEScene<V extends ONEVolume, T extends ONETexture> extend
             {
                 this.sortVolumes();
             }
+            
+            if (evt.getSource() instanceof ONEVolume && evt.getParameterName().contains("TEXTURE_ID"))
+            {
+                this.sortVolumes();
+            }
 
             this.fireChangeEvent(evt); //just propogate the event to any listeners
         };
@@ -355,6 +360,20 @@ public abstract class ONEScene<V extends ONEVolume, T extends ONETexture> extend
         }
 
         return (null);
+    }
+    
+    /**
+     * Returns the first mapped volume for the given texture
+     * @param t
+     * @return 
+     */
+    public V getVolume(T t)
+    {
+         ArrayList<V> mappedVolumes = this.getVolumes(t);
+         if(mappedVolumes.isEmpty())
+             return(null);
+         
+         return(mappedVolumes.get(0));
     }
 
     /**
