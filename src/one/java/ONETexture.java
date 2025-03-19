@@ -70,6 +70,7 @@ public class ONETexture extends ONEObject
         }
     }
     
+    
     public void setWidth(int w)
     {
         this.setParameter("WIDTH", ""+w);

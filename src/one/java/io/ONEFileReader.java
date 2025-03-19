@@ -63,17 +63,10 @@ public class ONEFileReader
         }
 
         //First read the header into the scene object
-        this.readHeader(scene, filename);
-        this.readData(scene, filename);
-    }
+        long headerLength = this.readHeader(scene, filename);
 
-    /**
-     * Reads the texture data into the scene. The header is needed before we can
-     * do this (the scene has a valid header)
-     */
-    private void readData(ONEScene<? extends ONEVolume, ? extends ONETexture> scene, String filename) throws Exception
-    {
         BufferedInputStream stream = null;
+
         try
         {
             ONETask task = new ONETask("Reading ONE textures...", scene.getTextures().size());
@@ -82,11 +75,9 @@ public class ONEFileReader
             try
             {
                 stream = new BufferedInputStream(new FileInputStream(filename));
-                for (int i = 0; i < scene.getTextures().size(); i++)
+                while (this.readNextTexture(scene, false, stream, headerLength))
                 {
-                    ONETexture texture = scene.getTextures().get(i);
-                    this.readData(texture, false, stream);
-                    task.setCurrentStep(i);
+                    task.addCurentSteps(1);
                 }
             }
             finally
@@ -107,50 +98,33 @@ public class ONEFileReader
     }
 
     /**
-     * Reads a single texture from the oneFile
+     * Reads the next texture from the file and stores it in the scene. If the
+     * texture cannot be found in the scene, it will throw and error Returns
+     * false if nothing more to read
      *
      * @param texture
      * @param stream
      */
-    public void readTexture(ONEScene<? extends ONEVolume, ? extends ONETexture> scene, ONETexture texture, String oneFile) throws Exception
+    private boolean readNextTexture(ONEScene scene, boolean skip, BufferedInputStream stream, long headerLength) throws Exception
     {
-        BufferedInputStream stream = new BufferedInputStream(new FileInputStream(oneFile));
-        for (int i = 0; i < scene.getTextures().size(); i++)
+        int remaining = stream.available();
+        //If we are done the data portion, leave
+        if (remaining <= headerLength)
         {
-            ONETexture sceneTexture = scene.getTextures().get(i);
-            //Skip any textures that we don't want
-            boolean skip = sceneTexture.getID() != texture.getID();
-
-            this.readData(sceneTexture, skip, stream);
-            //If this was the one we wanted, break.
-            if (!skip)
-            {
-                break;
-            }
+            return (false);
         }
 
-        stream.close();
-
-    }
-
-    /**
-     * Reads the data for the given texture from the input stream
-     *
-     * @param texture
-     * @param stream
-     */
-    private void readData(ONETexture texture, boolean skip, BufferedInputStream stream) throws Exception
-    {
         long textureID = ONEByteReader.nextLong(stream);
-        if (textureID != texture.getID())
-        {            
-            throw new Exception("Texture ID of data (" + textureID + ") does not match texture ID of object to read (" + texture.getID() + ").");
+        ONETexture texture = scene.getTexture(textureID);
+        if (texture == null)
+        {
+            throw new Exception("Texture in file (" + textureID + ") cannot be found in the scene header.");
         }
 
         //Number of voxels to read
         int numVoxels = ONEByteReader.nextInt(stream);
         //The size of each voxel in bytes
-        int voxelByteSize = texture.newVoxel(0,0,0).sizeInBytes();
+        int voxelByteSize = texture.newVoxel(0, 0, 0).sizeInBytes();
         //How many bytes do we have to read to get all the voxel data?
         long bytesToRead = (long) numVoxels * (long) voxelByteSize;
 
@@ -158,7 +132,7 @@ public class ONEFileReader
         if (skip)
         {
             stream.skip(bytesToRead);
-            return;
+            return true;
         }
 
         //how many voxels to read at a time?
@@ -172,7 +146,7 @@ public class ONEFileReader
 
         //The list of voxels we add to
         ArrayList<ONEVoxel> voxelList = texture.getVoxels();
-        
+
         //Grow the array here, once
         voxelList.ensureCapacity(voxelList.size() + numVoxels);
 
@@ -183,7 +157,7 @@ public class ONEFileReader
         {
             double maxGrey = 0;
             double maxA = 0;
-            
+
             while (bytesRead < bytesToRead)
             {
                 //Figure out how many bytes we should read, make sure we don't read too many
@@ -198,11 +172,11 @@ public class ONEFileReader
                 //Add all of the read voxels to our list
                 for (int j = 0; j < readVoxels; j++)
                 {
-                    ONEVoxel voxel = texture.newVoxel(0,0,0);
+                    ONEVoxel voxel = texture.newVoxel(0, 0, 0);
                     System.arraycopy(buffer, j * voxelByteSize, voxelBuffer, 0, voxelBuffer.length);
                     byteReader.setBytes(voxelBuffer);
                     voxel.read(byteReader);
-                    
+
                     maxGrey = Math.max(maxGrey, voxel.getGrey().doubleValue());
                     maxA = Math.max(maxA, voxel.getA().doubleValue());
                     voxelList.add(voxel);
@@ -219,32 +193,13 @@ public class ONEFileReader
             this.taskMonitor.remove();
         }
 
-    }
+        return (true);
 
-    /**
-     * Adds all of the values in the array to the list, starting at the
-     * startIndex of the array and ending at startIndex + length
-     */
-    private void addArrayToList(ArrayList<ONEVoxel> list, ONEVoxel[] array, int startIndex, int length)
-    {
-        //First expand the list size
-        list.ensureCapacity(list.size() + length);
-
-        int endIndex = startIndex + length;
-        for (int i = startIndex; i < endIndex; i++)
-        {
-            ONEVoxel v = array[i];
-            if (v == null)
-            {
-                continue;
-            }
-
-        }
     }
 
     /**
      * Reads the header from the filename and stores the info in the scene. The
-     * byte location of the start of the header in the file is returned.
+     * length of the header in bytes is returned
      */
     public long readHeader(ONEScene scene, String filename) throws Exception
     {
@@ -255,11 +210,12 @@ public class ONEFileReader
         }
 
         long fileSize = file.length();
-        if(fileSize <= 0)
-               throw new Exception("Unable to read ONE header from: " + filename + ". The file has 0 size.");
-        
+        if (fileSize <= 0)
+        {
+            throw new Exception("Unable to read ONE header from: " + filename + ". The file has 0 size.");
+        }
+
         RandomAccessFile raf = null;
-        
 
         try
         {
@@ -274,12 +230,14 @@ public class ONEFileReader
 
             this.readHeader(scene, raf);
 
-            return (headerStart);
+            return (fileSize-headerStart);
         }
         finally
         {
-            if(raf != null)
+            if (raf != null)
+            {
                 raf.close();
+            }
         }
     }
 
@@ -301,12 +259,12 @@ public class ONEFileReader
 
         //Read in the parameters for the scene
         scene.copyParameters(this.readParameters(raf));
-        
+
         ArrayList<ONEVolume> currentVolumes = new ArrayList<>(scene.getVolumes());
         ArrayList<ONETexture> currentTextures = new ArrayList<>(scene.getTextures());
-        
+
         ArrayList<ONEVolume> newVolumes = new ArrayList<>();
-        ArrayList<ONETexture> newTextures = new ArrayList<>();        
+        ArrayList<ONETexture> newTextures = new ArrayList<>();
 
         //VOLUMES
         {
@@ -315,7 +273,7 @@ public class ONEFileReader
             {
                 ONEVolume volume = scene.newVolume();
                 this.read(volume, raf, version);
-                newVolumes.add(volume);                
+                newVolumes.add(volume);
             }
         }
 
@@ -329,39 +287,48 @@ public class ONEFileReader
                 newTextures.add(texture);
             }
         }
-        
+
         //Purge our current list
-        for(int i = 0; i < currentVolumes.size(); i++)
+        for (int i = 0; i < currentVolumes.size(); i++)
         {
             ONEVolume cVolume = currentVolumes.get(i);
-            if(!newVolumes.contains(cVolume))
-                scene.remove(cVolume);            
+            if (!newVolumes.contains(cVolume))
+            {
+                scene.remove(cVolume);
+            }
         }
-        
-        for(int i = 0; i < currentTextures.size(); i++)
+
+        for (int i = 0; i < currentTextures.size(); i++)
         {
             ONETexture cTexture = currentTextures.get(i);
-            if(!newTextures.contains(cTexture))
-                scene.remove(cTexture);            
+            if (!newTextures.contains(cTexture))
+            {
+                scene.remove(cTexture);
+            }
         }
-        
+
         //Now set the new ones
-        for(int i = 0; i < newVolumes.size(); i++)
+        for (int i = 0; i < newVolumes.size(); i++)
+        {
             scene.add(newVolumes.get(i));
-        
-         for(int i = 0; i < newTextures.size(); i++)
+        }
+
+        for (int i = 0; i < newTextures.size(); i++)
+        {
             scene.add(newTextures.get(i));
+        }
     }
-    
+
     /**
-     * Creates a new scene.  Overridable so you can have your own type.
-     * @return 
+     * Creates a new scene. Overridable so you can have your own type.
+     *
+     * @return
      */
     protected ONEScene newScene()
     {
-        return(new ONEDefaultScene());
+        return (new ONEDefaultScene());
     }
-    
+
     /**
      * Reads the parameter list from the next point in the stream
      *
