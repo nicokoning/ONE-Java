@@ -63,7 +63,7 @@ public class ONEFileReader
         }
 
         //First read the header into the scene object
-        long headerLength = this.readHeader(scene, filename);
+        this.readHeader(scene, filename);
 
         BufferedInputStream stream = null;
 
@@ -75,8 +75,9 @@ public class ONEFileReader
             try
             {
                 stream = new BufferedInputStream(new FileInputStream(filename));
-                while (this.readNextTexture(scene, false, stream, headerLength))
+                for(int i = 0; i < scene.getTextures().size(); i++)                
                 {
+                    this.readNextTexture(scene, false, stream);
                     task.addCurentSteps(1);
                 }
             }
@@ -105,14 +106,9 @@ public class ONEFileReader
      * @param texture
      * @param stream
      */
-    private boolean readNextTexture(ONEScene scene, boolean skip, BufferedInputStream stream, long headerLength) throws Exception
+    private boolean readNextTexture(ONEScene scene, boolean skip, BufferedInputStream stream) throws Exception
     {
         int remaining = stream.available();
-        //If we are done the data portion, leave
-        if (remaining <= headerLength)
-        {
-            return (false);
-        }
 
         long textureID = ONEByteReader.nextLong(stream);
         ONETexture texture = scene.getTexture(textureID);
@@ -164,6 +160,11 @@ public class ONEFileReader
                 long readLength = Math.min(bufferSize, bytesToRead - bytesRead);
                 //Read the bytes
                 long read = stream.read(buffer, 0, (int) readLength);
+                if (read < 0)
+                {
+                    throw new Exception("End of file reached before texture has been read.  ONE file is corrupt.");
+                }
+
                 //How many voxels did we just read in?
                 int readVoxels = (int) (read / voxelByteSize);
                 //Increment our read bytes
@@ -198,10 +199,12 @@ public class ONEFileReader
     }
 
     /**
-     * Reads the header from the filename and stores the info in the scene. The
-     * length of the header in bytes is returned
+     * Returns the position of the header in the file
+     *
+     * @param filename
+     * @return
      */
-    public long readHeader(ONEScene scene, String filename) throws Exception
+    public static long getHeaderLocation(String filename) throws Exception
     {
         File file = new File(filename);
         if (!file.exists())
@@ -226,11 +229,33 @@ public class ONEFileReader
 
             //The start of the header
             long headerStart = fileSize - headerLength - ONEByteReader.LONG_SIZE;
+            return (headerStart);
+        }
+        finally
+        {
+            if (raf != null)
+            {
+                raf.close();
+            }
+        }
+    }
+
+    /**
+     * Reads the header from the filename and stores the info in the scene. The
+     * start location of the header is returned
+     */
+    public void readHeader(ONEScene scene, String filename) throws Exception
+    {
+        //The start of the header
+        long headerStart = getHeaderLocation(filename);
+
+        RandomAccessFile raf = null;
+
+        try
+        {
+            raf = new RandomAccessFile(filename, "r");          
             raf.seek(headerStart);
-
             this.readHeader(scene, raf);
-
-            return (fileSize-headerStart);
         }
         finally
         {

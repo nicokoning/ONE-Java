@@ -150,21 +150,21 @@ public class ONEFileWriter
             throw new Exception("Unable to write header to " + filename + ". The file does not exist.");
         }
 
-        //The header will start at the end for a blank file
-        long headerStart = file.length();
-
-        //Check to see if there is already a header and if so we need to replace it                
+        //Check to see if there is already a header and if so we need to replace it   
+        long headerLocation = file.length();
         try
         {
             ONEScene dummyScene = new ONEDefaultScene(); //we don't want to overwrite the one we are about to write!
-            headerStart = new ONEFileReader().readHeader(dummyScene, filename);
+            new ONEFileReader().readHeader(dummyScene, filename);
+            headerLocation = ONEFileReader.getHeaderLocation(filename);
         }
         catch (Exception e)
         {
         }
 
         RandomAccessFile raf = new RandomAccessFile(filename, "rw");
-        raf.seek(headerStart); //goto the start of the header        
+        
+        raf.seek(headerLocation); //goto the start of the header        
         this.writeHeader(scene, raf);
         raf.close();
 
