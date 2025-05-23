@@ -25,13 +25,6 @@ public class ONEByteVoxel extends ONEVoxel<Integer>
     }
 
     @Override
-    public int dataByteSize()
-    {
-        int size = ONEByteReader.BYTE_SIZE;
-        return (size);
-    }
-
-    @Override
     public void write(ONEByteWriter writer) throws Exception
     {
         writer.writeInt(this.xIndex);

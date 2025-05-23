@@ -33,13 +33,6 @@ public class ONEFloatVoxel extends ONEVoxel<Float>
     }
 
     @Override
-    public int dataByteSize()
-    {
-        int size = ONEByteReader.FLOAT_SIZE;
-        return (size);
-    }
-
-    @Override
     public void write(ONEByteWriter writer) throws Exception
     {
         writer.writeInt(this.xIndex);
@@ -50,7 +43,6 @@ public class ONEFloatVoxel extends ONEVoxel<Float>
         writer.writeFloat(this.g);
         writer.writeFloat(this.b);
         writer.writeFloat(this.a);
-
     }
 
     @Override

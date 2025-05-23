@@ -24,24 +24,6 @@ public abstract class ONEVoxel<T extends Number> implements Serializable
     protected int yIndex;
     protected int zIndex;
 
-    public static ONEVoxel newVoxel(ONE_TEXTURE_TYPE type) throws Exception
-    {
-        switch (type)
-        {
-            case RGBA_FLOAT ->
-            {
-                return (new ONEFloatVoxel());
-            }
-            case RGBA_BYTE ->
-            {
-                return (new ONEByteVoxel());
-            }
-
-            default ->
-                throw new Exception("Voxel type is unknown.");
-        }
-    }
-
     /**
      * Creates a new ONEVoxel object
      */
@@ -109,22 +91,6 @@ public abstract class ONEVoxel<T extends Number> implements Serializable
         }
 
         return (true);
-    }
-
-    /**
-     * How many bytes is each of the rgba data?
-     *
-     * @return
-     */
-    public abstract int dataByteSize();
-
-    /**
-     * Returns the size of the voxel in bytes for storage and reading purposes
-     */
-    public int sizeInBytes()
-    {
-        int size = 3 * ONEByteReader.INT_SIZE + 4 * dataByteSize();
-        return (size);
     }
 
     /**

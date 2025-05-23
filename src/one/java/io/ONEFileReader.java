@@ -120,7 +120,7 @@ public class ONEFileReader
         //Number of voxels to read
         int numVoxels = ONEByteReader.nextInt(stream);
         //The size of each voxel in bytes
-        int voxelByteSize = texture.newVoxel(0, 0, 0).sizeInBytes();
+        int voxelByteSize = texture.getVoxelByteSize();
         //How many bytes do we have to read to get all the voxel data?
         long bytesToRead = (long) numVoxels * (long) voxelByteSize;
 
@@ -173,7 +173,7 @@ public class ONEFileReader
                 //Add all of the read voxels to our list
                 for (int j = 0; j < readVoxels; j++)
                 {
-                    ONEVoxel voxel = texture.newVoxel(0, 0, 0);
+                    ONEVoxel voxel = texture.createVoxel();
                     System.arraycopy(buffer, j * voxelByteSize, voxelBuffer, 0, voxelBuffer.length);
                     byteReader.setBytes(voxelBuffer);
                     voxel.read(byteReader);

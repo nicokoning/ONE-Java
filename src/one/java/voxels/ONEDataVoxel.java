@@ -10,7 +10,6 @@ import one.java.io.ONEByteWriter;
  */
 public class ONEDataVoxel extends ONEVoxel<Float>
 {
-
     //The serial version for deserializing
     private static final long serialVersionUID = 1L;
 
@@ -19,13 +18,6 @@ public class ONEDataVoxel extends ONEVoxel<Float>
     public ONEDataVoxel(float[] variables)
     {
         this.variables = variables;
-    }
-
-    @Override
-    public int dataByteSize()
-    {
-        int size = ONEByteReader.FLOAT_SIZE;
-        return (size);
     }
 
     @Override
@@ -130,15 +122,6 @@ public class ONEDataVoxel extends ONEVoxel<Float>
         return(new ONEDataVoxel(newVars));
     }
     
-     /**
-     * Returns the size of the voxel in bytes for storage and reading purposes
-     */
-    public final int sizeInBytes()
-    {
-        int size = 3 * ONEByteReader.INT_SIZE + this.variables.length * dataByteSize();
-        return (size);
-    }
-
     @Override
     public boolean isZero()
     {

@@ -5,6 +5,10 @@
 package one.java;
 
 import java.util.ArrayList;
+import one.java.io.ONEByteReader;
+import one.java.voxels.ONEByteVoxel;
+import one.java.voxels.ONEDataVoxel;
+import one.java.voxels.ONEFloatVoxel;
 import one.java.voxels.ONEVoxel;
 
 /**
@@ -13,11 +17,12 @@ import one.java.voxels.ONEVoxel;
  */
 public class ONETexture extends ONEObject
 {
+
     public enum ONE_TEXTURE_TYPE
     {
         RGBA_BYTE, RGBA_FLOAT
     }
-    
+
     public enum ONE_TEXTURE_CONTENT_TYPE
     {
         VOLUME, PROCEDURAL, DATA
@@ -69,24 +74,62 @@ public class ONETexture extends ONEObject
             this.setSize(res, res, res);
         }
     }
-    
-    
+
+    /**
+     * Returns the size of a voxel in bytes
+     *
+     * @return
+     */
+    public int getVoxelByteSize() throws Exception
+    {
+        //The index size
+        int size = 3 * ONEByteReader.INT_SIZE;
+
+        //If this is a data voxel, find out how many variables
+        if (this.getContentType().equals(ONE_TEXTURE_CONTENT_TYPE.DATA))
+        {
+            int numVariables = this.getIntParameter("NUM_VARIABLES");
+            
+            //If we can't read the number of variables, try to create a new voxel and see if we can get it from there
+            if(numVariables <= 0)
+            {
+                 ONEDataVoxel v = (ONEDataVoxel)this.createVoxel();
+                 numVariables = v.getVariables().length;                 
+            }
+            
+            size += numVariables * ONEByteReader.FLOAT_SIZE;
+            
+        }
+
+        //The data
+        else if (this.getType().equals(ONE_TEXTURE_TYPE.RGBA_BYTE))
+        {
+            size += 4 * ONEByteReader.BYTE_SIZE;
+        }
+
+        else if (this.getType().equals(ONE_TEXTURE_TYPE.RGBA_FLOAT))
+        {
+            size += 4 * ONEByteReader.FLOAT_SIZE;
+        }
+
+        return (size);
+    }
+
     public void setWidth(int w)
     {
-        this.setParameter("WIDTH", ""+w);
+        this.setParameter("WIDTH", "" + w);
     }
-    
-     public void setHeight(int h)
+
+    public void setHeight(int h)
     {
-        this.setParameter("HEIGHT", ""+h);
+        this.setParameter("HEIGHT", "" + h);
     }
-     
-      public void setDepth(int d)
+
+    public void setDepth(int d)
     {
-        this.setParameter("DEPTH", ""+d);
+        this.setParameter("DEPTH", "" + d);
     }
-    
-     
+
     /**
      * Copies the given volume to this one
      */
@@ -94,8 +137,8 @@ public class ONETexture extends ONEObject
     {
         this.copyHeader(texture);
         this.setID(texture.getID());
-    }    
-    
+    }
+
     /**
      * Returns true if there are no voxels in this texture
      */
@@ -132,7 +175,7 @@ public class ONETexture extends ONEObject
      * Removes all zero voxels
      */
     public void purge()
-    {        
+    {
         for (int i = 0; i < this.voxelList.size(); i++)
         {
             ONEVoxel v = this.voxelList.get(i);
@@ -144,13 +187,35 @@ public class ONETexture extends ONEObject
     }
 
     /**
-     * Creates a new voxel that is compatible with this texture, preassigns the index
+     * Creates a new voxel that is compatible with this texture, preassigns the
+     * index
      */
-    public ONEVoxel newVoxel(int x, int y, int z) throws Exception
+    public ONEVoxel createVoxel() throws Exception
     {
-        ONEVoxel v = ONEVoxel.newVoxel(this.getType());        
-        v.setIndex(x, y, z);
-        return(v);
+        //If this is a data voxel, find out how many variables
+        if (this.getContentType().equals(ONE_TEXTURE_CONTENT_TYPE.DATA))
+        {
+            int numVariables = this.getIntParameter("NUM_VARIABLES");
+            if (numVariables <= 0)
+            {
+                throw new Exception("Unable to create data voxel.  Unknown number of variables.");
+            }
+
+            return (new ONEDataVoxel(new float[numVariables]));
+        }
+
+        //The data
+        if (this.getType().equals(ONE_TEXTURE_TYPE.RGBA_BYTE))
+        {
+            return (new ONEByteVoxel());
+        }
+
+        if (this.getType().equals(ONE_TEXTURE_TYPE.RGBA_FLOAT))
+        {
+            return (new ONEFloatVoxel());
+        }
+
+        throw new Exception("Unrecognized texture type when creating voxel.");
     }
 
     /**
@@ -176,39 +241,42 @@ public class ONETexture extends ONEObject
         return (true);
     }
 
-    
     /**
      * Scales each voxel in this texture by the appropriate value given
-     */ 
+     */
     public void scale(double rFactor, double gFactor, double bFactor, double aFactor)
     {
-        for(int i = 0; i < this.voxelList.size(); i++)
+        for (int i = 0; i < this.voxelList.size(); i++)
         {
             ONEVoxel v = this.voxelList.get(i);
             v.scaleColor(rFactor, gFactor, bFactor, aFactor);
         }
     }
-    
+
     /**
-     * Creates an index array for fast lookups into the voxel list.  Each array element represents the index into the voxel list + 1 (an index value of 0 means it does not exist)
-     * @return 
+     * Creates an index array for fast lookups into the voxel list. Each array
+     * element represents the index into the voxel list + 1 (an index value of 0
+     * means it does not exist)
+     *
+     * @return
      */
     public int[][][] createIndexArray()
     {
         //Index our voxels
         int[][][] indexArray = new int[this.getWidth()][this.getHeight()][this.getDepth()];
-        for(int i = 0; i < this.voxelList.size(); i++)
+        for (int i = 0; i < this.voxelList.size(); i++)
         {
             ONEVoxel v = this.voxelList.get(i);
             int x = v.getIndex()[0];
             int y = v.getIndex()[1];
             int z = v.getIndex()[2];
-            
-            indexArray[x][y][z] = i+1;
+
+            indexArray[x][y][z] = i + 1;
         }
-        
-        return(indexArray);
+
+        return (indexArray);
     }
+
     /**
      * Adds the given texture to this one (cell index by cell index)
      *
@@ -218,7 +286,7 @@ public class ONETexture extends ONEObject
     {
         //Index our voxels
         int[][][] indexArray = this.createIndexArray();
-        
+
         for (int i = 0; i < tex.getVoxels().size(); i++)
         {
             ONEVoxel v1 = tex.getVoxels().get(i);
@@ -232,10 +300,11 @@ public class ONETexture extends ONEObject
                 continue;
             }
 
-            int index = indexArray[x][y][z]-1;
+            int index = indexArray[x][y][z] - 1;
             if (index < 0)
             {
-                ONEVoxel newVoxel = this.newVoxel(v1.getIndex()[0], v1.getIndex()[1], v1.getIndex()[2]);
+                ONEVoxel newVoxel = this.createVoxel();
+                newVoxel.setIndex(v1.getIndex()[0], v1.getIndex()[1], v1.getIndex()[2]);
                 newVoxel.setColor(v1.getR(), v1.getG(), v1.getB(), v1.getA());
                 this.getVoxels().add(newVoxel);
                 indexArray[x][y][z] = this.voxelList.size();
@@ -245,7 +314,7 @@ public class ONETexture extends ONEObject
             else
             {
                 ONEVoxel v0 = this.voxelList.get(index);
-                v0.addColor(v1.getR(), v1.getG(), v1.getB(), v1.getA());                
+                v0.addColor(v1.getR(), v1.getG(), v1.getB(), v1.getA());
             }
 
         }
@@ -268,16 +337,18 @@ public class ONETexture extends ONEObject
 
         return (null);
     }
-    
+
     /**
      * Returns the voxel with the given index in the list
      */
     public ONEVoxel getVoxel(int index)
     {
-        if(index < 0 || index >= this.voxelList.size())
-            return(null);
-        
-        return(this.voxelList.get(index));
+        if (index < 0 || index >= this.voxelList.size())
+        {
+            return (null);
+        }
+
+        return (this.voxelList.get(index));
     }
 
     //--------------------------------------------------------------------------
@@ -306,7 +377,7 @@ public class ONETexture extends ONEObject
     {
         this.setParameter("TYPE", type.name());
     }
-    
+
     /**
      * @param type the type to set
      */
@@ -314,14 +385,16 @@ public class ONETexture extends ONEObject
     {
         this.setParameter("CONTENT_TYPE", type.name());
     }
-    
+
     public ONE_TEXTURE_CONTENT_TYPE getContentType()
     {
         String param = this.getParameter("CONTENT_TYPE");
-        if(param == null)
-            return(ONE_TEXTURE_CONTENT_TYPE.VOLUME);
-        
-        return(ONE_TEXTURE_CONTENT_TYPE.valueOf(param));
+        if (param == null)
+        {
+            return (ONE_TEXTURE_CONTENT_TYPE.VOLUME);
+        }
+
+        return (ONE_TEXTURE_CONTENT_TYPE.valueOf(param));
     }
 
     /**
@@ -364,6 +437,17 @@ public class ONETexture extends ONEObject
     public void setVoxels(ArrayList<ONEVoxel> voxelList)
     {
         this.voxelList = voxelList;
+        
+        if(this.voxelList.isEmpty())
+            return;
+        
+        //If this is a data voxel, set the number of parameters in the texture header
+        ONEVoxel v = this.voxelList.get(0);
+        if(v instanceof ONEDataVoxel)
+        {
+            int numVariables = ((ONEDataVoxel)v).getVariables().length;
+            this.setParameter("NUM_VARIABLES", ""+numVariables);
+        }
     }
 
 } //end of ONETexture class
