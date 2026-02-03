@@ -5,9 +5,6 @@
 package one.java.voxels;
 
 import java.io.Serializable;
-import one.java.ONETexture.ONE_TEXTURE_TYPE;
-import static one.java.ONETexture.ONE_TEXTURE_TYPE.RGBA_BYTE;
-import static one.java.ONETexture.ONE_TEXTURE_TYPE.RGBA_FLOAT;
 import one.java.io.ONEByteReader;
 import one.java.io.ONEByteWriter;
 
@@ -102,7 +99,7 @@ public abstract class ONEVoxel<T extends Number> implements Serializable
      * Sets the voxel color
      */
     public abstract void addColor(Number r, Number g, Number b, Number a);
-
+    
     /**
      * Sets the voxel color
      */
