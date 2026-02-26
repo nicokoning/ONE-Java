@@ -25,7 +25,7 @@ public class ONETexture extends ONEObject
 
     public enum ONE_TEXTURE_CONTENT_TYPE
     {
-        VOLUME, PROCEDURAL, DATA
+        VOLUME, PROCEDURAL, DATA, STARS
     }
 
     //The serial version for deserializing

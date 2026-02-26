@@ -17,9 +17,15 @@ public class ONEFloatVoxel extends ONEVoxel<Float>
     public ONEFloatVoxel()
     {
     }
+    
+    public ONEFloatVoxel(int x, int y, int z)
+    {
+        this.setIndex(x, y, z);
+    }
 
     public ONEFloatVoxel(int x, int y, int z, float r, float g, float b, float a)
     {
+        this(x,y,z);
         this.setColor(r, g, b, a);
     }
 
