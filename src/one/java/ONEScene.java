@@ -36,7 +36,7 @@ public abstract class ONEScene<V extends ONEVolume, T extends ONETexture> extend
     {
         this.initialize();
     } //end of constructor
-
+    
     /**
      * Initializes the object
      */
@@ -175,7 +175,7 @@ public abstract class ONEScene<V extends ONEVolume, T extends ONETexture> extend
     @Override
     public void dispose()
     {
-        super.dispose();
+        super.dispose();        
         this.clear();
     }
 
