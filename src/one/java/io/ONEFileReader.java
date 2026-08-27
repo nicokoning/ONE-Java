@@ -371,10 +371,10 @@ public class ONEFileReader
         for (int i = 0; i < pairs.length; i++)
         {
             String pair = pairs[i];
-            String[] s = pair.split(":");
+            String[] s = pair.split(":", 2);
             if (s.length != 2)
             {
-                continue;
+                s = new String[]{s[0], ""};
             }
 
             ONEParameter param = new ONEParameter(s[0], s[1]);

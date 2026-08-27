@@ -389,7 +389,7 @@ public class ONETexture extends ONEObject
     public ONE_TEXTURE_CONTENT_TYPE getContentType()
     {
         String param = this.getParameter("CONTENT_TYPE");
-        if (param == null)
+        if (param == null || param.isBlank())
         {
             return (ONE_TEXTURE_CONTENT_TYPE.VOLUME);
         }
@@ -428,7 +428,7 @@ public class ONETexture extends ONEObject
     {
         this.setParameter("WIDTH", Integer.toString(width));
         this.setParameter("HEIGHT", Integer.toString(height));
-        this.setParameter("DEPTH", Integer.toString(depth));
+        this.setParameter("DEPTH", Integer.toString(depth));        
     }
 
     /**

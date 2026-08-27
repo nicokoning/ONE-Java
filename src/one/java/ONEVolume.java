@@ -246,6 +246,11 @@ public class ONEVolume extends ONEObject
         return (scales);
     }
     
+    public void addTexture(ONETexture tex)
+    {
+        this.addTextureIDs(tex.getID());
+    }
+    
     
 
     /**

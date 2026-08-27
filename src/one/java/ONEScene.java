@@ -1,7 +1,8 @@
 package one.java;
 
 import java.util.ArrayList;
-import java.util.Comparator;
+import one.java.ONEPosition.ONE_COORDINATE_SYSTEM;
+import one.java.ONEPosition.ONE_DISTANCE;
 import one.java.events.ONEChangeEvent;
 import one.java.events.ONEChangeEventType;
 import one.java.events.ONEChangeListener;
@@ -36,7 +37,7 @@ public abstract class ONEScene<V extends ONEVolume, T extends ONETexture> extend
     {
         this.initialize();
     } //end of constructor
-    
+
     /**
      * Initializes the object
      */
@@ -70,7 +71,7 @@ public abstract class ONEScene<V extends ONEVolume, T extends ONETexture> extend
             {
                 this.sortVolumes();
             }
-            
+
             if (evt.getSource() instanceof ONEVolume && evt.getParameterName().contains("TEXTURE_ID"))
             {
                 this.sortVolumes();
@@ -91,49 +92,61 @@ public abstract class ONEScene<V extends ONEVolume, T extends ONETexture> extend
         }
 
     } //end of initialize function
-    
+
     /**
      * Returns true if this header matches the one given
+     *
      * @param s
-     * @return 
-     */ 
+     * @return
+     */
     @Override
     protected boolean matches(ONEObject o)
     {
-        if(!(o instanceof ONEScene))
-            return(false);
-        
-        if(!super.matches(o))
-            return(false);
-        
-        ONEScene s = (ONEScene)o;
-        
+        if (!(o instanceof ONEScene))
+        {
+            return (false);
+        }
+
+        if (!super.matches(o))
+        {
+            return (false);
+        }
+
+        ONEScene s = (ONEScene) o;
+
         //Check each volume and texture
-        if(this.getVolumes().size() != s.getVolumes().size())
-            return(false);
-        if(this.getTextures().size() != s.getTextures().size())
-            return(false);        
-                
-        for(int i = 0; i < this.getVolumes().size(); i++)
+        if (this.getVolumes().size() != s.getVolumes().size())
+        {
+            return (false);
+        }
+        if (this.getTextures().size() != s.getTextures().size())
+        {
+            return (false);
+        }
+
+        for (int i = 0; i < this.getVolumes().size(); i++)
         {
             ONEVolume v = this.getVolumes().get(i);
             ONEVolume sV = s.getVolume(v.getID());
-            if(!v.matches(sV))            
-                return(false);
+            if (!v.matches(sV))
+            {
+                return (false);
+            }
         }
-        
-        for(int i = 0; i < this.getTextures().size(); i++)
+
+        for (int i = 0; i < this.getTextures().size(); i++)
         {
             ONETexture t = this.getTextures().get(i);
             ONETexture sT = s.getTexture(t.getID());
-            if(!t.matches(sT))            
-                return(false);
+            if (!t.matches(sT))
+            {
+                return (false);
+            }
         }
-        
-        //Passed all the tests
-        return(true);
-    }
 
+        //Passed all the tests
+        return (true);
+    }
 
     /**
      * Copies the given scene to this one
@@ -157,7 +170,7 @@ public abstract class ONEScene<V extends ONEVolume, T extends ONETexture> extend
         for (int i = 0; i < scene.getTextures().size(); i++)
         {
             T texture = scene.getTextures().get(i);
-            T newTexture = (T)texture.copy();
+            T newTexture = (T) texture.copy();
             this.add(newTexture);
         }
 
@@ -175,7 +188,7 @@ public abstract class ONEScene<V extends ONEVolume, T extends ONETexture> extend
     @Override
     public void dispose()
     {
-        super.dispose();        
+        super.dispose();
         this.clear();
     }
 
@@ -287,8 +300,8 @@ public abstract class ONEScene<V extends ONEVolume, T extends ONETexture> extend
         {
             return;
         }
-        
-        if(this.newTexture().getClass().isAssignableFrom(o.getClass()))
+
+        if (this.newTexture().getClass().isAssignableFrom(o.getClass()))
         {
             this.remove((T) o);
         }
@@ -361,19 +374,22 @@ public abstract class ONEScene<V extends ONEVolume, T extends ONETexture> extend
 
         return (null);
     }
-    
+
     /**
      * Returns the first mapped volume for the given texture
+     *
      * @param t
-     * @return 
+     * @return
      */
     public V getVolume(T t)
     {
-         ArrayList<V> mappedVolumes = this.getVolumes(t);
-         if(mappedVolumes.isEmpty())
-             return(null);
-         
-         return(mappedVolumes.get(0));
+        ArrayList<V> mappedVolumes = this.getVolumes(t);
+        if (mappedVolumes.isEmpty())
+        {
+            return (null);
+        }
+
+        return (mappedVolumes.get(0));
     }
 
     /**
@@ -397,6 +413,31 @@ public abstract class ONEScene<V extends ONEVolume, T extends ONETexture> extend
         }
 
         return (mappedVolumes);
+    }
+
+    /**
+     * Returns the position of this scene in astronomical coordinates determined
+     * from the parameters
+     */
+    public ONEPosition getPosition()
+    {
+        try
+        {
+            ONEPosition.ONE_COORDINATE_SYSTEM coordinateSystem = ONE_COORDINATE_SYSTEM.valueOf(this.getParameter("POS_COORDINATE_SYSTEM"));
+            ONEPosition.ONE_DISTANCE distanceUnit = ONE_DISTANCE.valueOf(this.getParameter("POS_DISTANCE_UNIT"));
+            double lon = this.getDoubleParameter("POS_LON");
+            double lat = this.getDoubleParameter("POS_LAT");
+            double dist = this.getDoubleParameter("POS_DISTANCE");
+            
+            ONEPosition pos = new ONEPosition(coordinateSystem, lon, lat, dist, distanceUnit);
+            return(pos);            
+        }
+        catch (Exception e)
+        {
+            System.out.println("Unable to generate ONE position from scene parameters: " + e.getMessage());
+        }
+        
+        return(null);
     }
 
     /**
