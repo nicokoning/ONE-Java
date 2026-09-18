@@ -89,16 +89,16 @@ public class ONETexture extends ONEObject
         if (this.getContentType().equals(ONE_TEXTURE_CONTENT_TYPE.DATA))
         {
             int numVariables = this.getIntParameter("NUM_VARIABLES");
-            
+
             //If we can't read the number of variables, try to create a new voxel and see if we can get it from there
-            if(numVariables <= 0)
+            if (numVariables <= 0)
             {
-                 ONEDataVoxel v = (ONEDataVoxel)this.createVoxel();
-                 numVariables = v.getVariables().length;                 
+                ONEDataVoxel v = (ONEDataVoxel) this.createVoxel();
+                numVariables = v.getVariables().length;
             }
-            
+
             size += numVariables * ONEByteReader.FLOAT_SIZE;
-            
+
         }
 
         //The data
@@ -276,6 +276,8 @@ public class ONETexture extends ONEObject
 
         return (indexArray);
     }
+    
+    
 
     /**
      * Adds the given texture to this one (cell index by cell index)
@@ -284,12 +286,22 @@ public class ONETexture extends ONEObject
      */
     public void add(ONETexture tex) throws Exception
     {
+        this.add(tex.getVoxels());
+    }
+
+    /**
+     * Adds the given texture to this one (cell index by cell index)
+     *
+     * @param tex
+     */
+    public void add(ArrayList<ONEVoxel> voxels) throws Exception
+    {
         //Index our voxels
         int[][][] indexArray = this.createIndexArray();
 
-        for (int i = 0; i < tex.getVoxels().size(); i++)
+        for (int i = 0; i < voxels.size(); i++)
         {
-            ONEVoxel v1 = tex.getVoxels().get(i);
+            ONEVoxel v1 = voxels.get(i);
             int x = v1.getIndex()[0];
             int y = v1.getIndex()[1];
             int z = v1.getIndex()[2];
@@ -303,10 +315,8 @@ public class ONETexture extends ONEObject
             int index = indexArray[x][y][z] - 1;
             if (index < 0)
             {
-                ONEVoxel newVoxel = this.createVoxel();
-                newVoxel.setIndex(v1.getIndex()[0], v1.getIndex()[1], v1.getIndex()[2]);
+                ONEVoxel newVoxel = this.addVoxel(v1.getIndex()[0], v1.getIndex()[1], v1.getIndex()[2]);
                 newVoxel.setColor(v1.getR(), v1.getG(), v1.getB(), v1.getA());
-                this.getVoxels().add(newVoxel);
                 indexArray[x][y][z] = this.voxelList.size();
                 continue;
             }
@@ -318,6 +328,27 @@ public class ONETexture extends ONEObject
             }
 
         }
+    }
+    
+    /**
+     * Adds a new voxel to the texture at the given index.  If it already exists
+     * the current voxel will be returned
+     * @param x
+     * @param y
+     * @param z
+     * @return 
+     */
+    public ONEVoxel addVoxel(int x, int y, int z) throws Exception
+    {
+        ONEVoxel v = this.getVoxel(x, y, z);
+        if(v == null)
+        {
+            v = this.createVoxel();
+            v.setIndex(x, y, z);
+            this.getVoxels().add(v);
+        }
+        
+        return(v);
     }
 
     /**
@@ -428,7 +459,7 @@ public class ONETexture extends ONEObject
     {
         this.setParameter("WIDTH", Integer.toString(width));
         this.setParameter("HEIGHT", Integer.toString(height));
-        this.setParameter("DEPTH", Integer.toString(depth));        
+        this.setParameter("DEPTH", Integer.toString(depth));
     }
 
     /**
@@ -437,16 +468,18 @@ public class ONETexture extends ONEObject
     public void setVoxels(ArrayList<ONEVoxel> voxelList)
     {
         this.voxelList = voxelList;
-        
-        if(this.voxelList.isEmpty())
+
+        if (this.voxelList.isEmpty())
+        {
             return;
-        
+        }
+
         //If this is a data voxel, set the number of parameters in the texture header
         ONEVoxel v = this.voxelList.get(0);
-        if(v instanceof ONEDataVoxel)
+        if (v instanceof ONEDataVoxel)
         {
-            int numVariables = ((ONEDataVoxel)v).getVariables().length;
-            this.setParameter("NUM_VARIABLES", ""+numVariables);
+            int numVariables = ((ONEDataVoxel) v).getVariables().length;
+            this.setParameter("NUM_VARIABLES", "" + numVariables);
         }
     }
 

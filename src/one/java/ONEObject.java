@@ -64,6 +64,20 @@ public abstract class ONEObject implements Serializable
     {
         support.removeChangeListener(l);
     }
+    
+    /**
+     * Sets the new list of parameters for this, keeps what is in the old header
+     *
+     * @param params
+     */
+    public void mergeParameters(ArrayList<ONEParameter> params)
+    {
+        for (int i = 0; i < params.size(); i++)
+        {
+            ONEParameter param = params.get(i);
+            this.setParameter(param.key, param.value);
+        }
+    }
 
     /**
      * Sets the new list of parameters for this, clears anything else that isn't
@@ -100,6 +114,18 @@ public abstract class ONEObject implements Serializable
         this.setName(object.getName());
 
         this.copyParameters(object.getParameters());
+    }
+    
+     /**
+     * Copies the header info from the object to this object
+     *
+     * @param object
+     */
+    public void mergeHeader(ONEObject object)
+    {
+        this.setName(object.getName());
+
+        this.mergeParameters(object.getParameters());
     }
 
     /**

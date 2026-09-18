@@ -140,11 +140,8 @@ public class ONEFileReader
 
         ONEByteReader byteReader = new ONEByteReader();
 
-        //The list of voxels we add to
-        ArrayList<ONEVoxel> voxelList = texture.getVoxels();
-
         //Grow the array here, once
-        voxelList.ensureCapacity(voxelList.size() + numVoxels);
+        ArrayList<ONEVoxel> voxelList = new ArrayList<>(numVoxels);
 
         long bytesRead = 0;
         ONETask task = new ONETask("Reading ONE texture: " + texture.getName() + "", numVoxels);
