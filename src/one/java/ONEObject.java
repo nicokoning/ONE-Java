@@ -44,10 +44,10 @@ public abstract class ONEObject implements Serializable
     {
         support.clear();
     }
-    
+
     public ONEObject copy()
     {
-        return(ONEObject)ObjectSerializer.deepCopy(this);
+        return (ONEObject) ObjectSerializer.deepCopy(this);
     }
 
     private void initializeTransient()
@@ -64,7 +64,7 @@ public abstract class ONEObject implements Serializable
     {
         support.removeChangeListener(l);
     }
-    
+
     /**
      * Sets the new list of parameters for this, keeps what is in the old header
      *
@@ -115,8 +115,8 @@ public abstract class ONEObject implements Serializable
 
         this.copyParameters(object.getParameters());
     }
-    
-     /**
+
+    /**
      * Copies the header info from the object to this object
      *
      * @param object
@@ -160,9 +160,11 @@ public abstract class ONEObject implements Serializable
      */
     protected boolean matches(ONEObject o)
     {
-        if(o == null)
-            return(false);
-        
+        if (o == null)
+        {
+            return (false);
+        }
+
         if (o.getID() != this.getID())
         {
             return (false);
@@ -431,6 +433,55 @@ public abstract class ONEObject implements Serializable
         }
 
         return (0.0);
+    }
+
+    /**
+     * Returns the 3x3 matrix stored in the given parameter.
+     *
+     * Expected format: [R00, R01, R02, R10, R11, R12, R20, R21, R22]
+     *
+     * @param key parameter name
+     * @return the 3x3 matrix, or null if missing or invalid.
+     */
+    public double[][] getMatrix3DParameter(String key)
+    {
+        String value = this.getParameter(key);
+        if (value == null)
+        {
+            return null;
+        }
+        value = value.trim();
+        if (!value.startsWith("[") || !value.endsWith("]"))
+        {
+            return null;
+        }
+        String contents = value.substring(1, value.length() - 1).trim();
+        String[] values = contents.split("\\s*,\\s*", -1);
+        if (values.length != 9)
+        {
+            return null;
+        }
+        double[][] matrix = new double[3][3];
+        try
+        {
+            for (int row = 0; row < 3; row++)
+            {
+                for (int column = 0; column < 3; column++)
+                {
+                    double element = Double.parseDouble(values[row * 3 + column]);
+                    if (!Double.isFinite(element))
+                    {
+                        return null;
+                    }
+                    matrix[row][column] = element;
+                }
+            }
+        }
+        catch (NumberFormatException e)
+        {
+            return null;
+        }
+        return matrix;
     }
 
 } //end of ONEObject class
