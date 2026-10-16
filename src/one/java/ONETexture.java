@@ -466,7 +466,7 @@ public class ONETexture extends ONEObject
      * @param voxelList the voxelList to set
      */
     public void setVoxels(ArrayList<ONEVoxel> voxelList)
-    {
+    {        
         this.voxelList = voxelList;
 
         if (this.voxelList.isEmpty())

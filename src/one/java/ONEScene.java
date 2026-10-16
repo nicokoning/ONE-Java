@@ -285,6 +285,7 @@ public abstract class ONEScene<V extends ONEVolume, T extends ONETexture> extend
         {
             T currentTexture = textures.get(index);
             currentTexture.copyHeader(texture);
+            currentTexture.setVoxels(texture.getVoxels());
             return;
         }
         this.textures.add(texture);

@@ -10,6 +10,7 @@ import java.util.List;
  */
 public class ONEVolume extends ONEObject
 {
+
     //The serial version for deserializing
     private static final long serialVersionUID = 1L;
 
@@ -21,39 +22,38 @@ public class ONEVolume extends ONEObject
         this.addParameter("SCALE_X", "1");
         this.addParameter("SCALE_Y", "1");
         this.addParameter("SCALE_Z", "1");
-        
+
         this.addParameter("OFFSET_X", "0");
         this.addParameter("OFFSET_Y", "0");
         this.addParameter("OFFSET_Z", "0");
-        
+
         this.addParameter("ORDER", "0");
         this.addParameter("REPLACE", "0");
     } //end of constructor
-    
+
     public void dispose()
     {
         this.clearTextureIDs();
         super.dispose();
-        
+
     }
-        
-    
+
     /**
      * Removes obsolete parameters, adds new required ones etc
      */
     public void clean()
-    {        
+    {
         super.clean();
-        
+
         //Convert from the old scale to the new ones
         double scale = this.getDoubleParameter("SCALE");
-        if(scale > 0)
+        if (scale > 0)
         {
             this.setScales(scale, scale, scale);
             this.removeParameter("SCALE");
         }
     }
-    
+
     /**
      * Copies the given volume to this one
      */
@@ -65,30 +65,31 @@ public class ONEVolume extends ONEObject
 
     /**
      * Sets the emission parameter
-     */ 
+     */
     public void setEmission(double value)
     {
         this.setParameter("EMISSION", "" + value);
     }
 
-   
-
     /**
      * Return the emission parameter value
+     *
      * @return the emission parameter value if it exists
      */
     public double getEmission()
     {
-        if(this.getParameter("EMISSION") == null)
-            return(1);
-        
+        if (this.getParameter("EMISSION") == null)
+        {
+            return (1);
+        }
+
         return (this.getDoubleParameter("EMISSION"));
 
     }
-        
-     /**
+
+    /**
      * Sets the opacity parameter
-     */ 
+     */
     public void setOpacity(double value)
     {
         this.setParameter("OPACITY", "" + value);
@@ -96,16 +97,17 @@ public class ONEVolume extends ONEObject
 
     /**
      * Return the opacity parameter value
+     *
      * @return the opacity parameter value if it exists
      */
     public double getOpacity()
     {
         return (this.getDoubleParameter("OPACITY"));
     }
-    
-     /**
+
+    /**
      * Sets the blend parameter
-     */ 
+     */
     public void setBlend(double value)
     {
         this.setParameter("BLEND", "" + value);
@@ -113,6 +115,7 @@ public class ONEVolume extends ONEObject
 
     /**
      * Return the blend parameter value
+     *
      * @return the blend parameter value if it exists
      */
     public double getBlend()
@@ -151,13 +154,14 @@ public class ONEVolume extends ONEObject
     {
         this.setParameter("REPLACE", "" + replace);
     }
-    
-      /**
-     * @return the visible parameter, if it doesn't exist then we return true by default
+
+    /**
+     * @return the visible parameter, if it doesn't exist then we return true by
+     * default
      */
     public boolean isVisible()
     {
-        return(this.getParameter("VISIBLE") == null || this.getBooleanParameter("VISIBLE"));
+        return (this.getParameter("VISIBLE") == null || this.getBooleanParameter("VISIBLE"));
     }
 
     /**
@@ -170,6 +174,7 @@ public class ONEVolume extends ONEObject
 
     /**
      * Sets the offsets for this volume
+     *
      * @param x the x offset
      * @param y the y offset
      * @param z the z offset
@@ -183,6 +188,7 @@ public class ONEVolume extends ONEObject
 
     /**
      * Returns the offsets for this volume
+     *
      * @return an array containing the x,y,z (0,1,2) offsets.
      */
     public double[] getOffsets()
@@ -197,6 +203,7 @@ public class ONEVolume extends ONEObject
 
     /**
      * Sets the volume rotation in deg
+     *
      * @param x x rotation in deg
      * @param y y rotation in deg
      * @param z z rotation in deg
@@ -210,7 +217,8 @@ public class ONEVolume extends ONEObject
 
     /**
      * Returns an array of rotation values for this volume (x,y,z -> 0,1,2)
-     * @return 
+     *
+     * @return
      */
     public double[] getRotations()
     {
@@ -221,8 +229,8 @@ public class ONEVolume extends ONEObject
 
         return (offsets);
     }
-    
-     /**
+
+    /**
      * Sets the volume scales
      */
     public void setScales(double x, double y, double z)
@@ -234,7 +242,8 @@ public class ONEVolume extends ONEObject
 
     /**
      * Returns an array of scale values for this volume (x,y,z -> 0,1,2)
-     * @return 
+     *
+     * @return
      */
     public double[] getScales()
     {
@@ -245,13 +254,11 @@ public class ONEVolume extends ONEObject
 
         return (scales);
     }
-    
+
     public void addTexture(ONETexture tex)
     {
         this.addTextureIDs(tex.getID());
     }
-    
-    
 
     /**
      * Clears all of the texture IDs that are mapped to this volume
@@ -274,7 +281,8 @@ public class ONEVolume extends ONEObject
 
     /**
      * Sets a list of texture IDs that are mapped to this volume
-     * @param ids 
+     *
+     * @param ids
      */
     public void setTextureIDs(long... ids)
     {
@@ -284,64 +292,68 @@ public class ONEVolume extends ONEObject
         int num = 0;
         for (int i = 0; i < ids.length; i++)
         {
-             if(ids[i] == 0)
+            if (ids[i] == 0)
+            {
                 continue;
-             
+            }
+
             String key = "TEXTURE_ID_" + num++;
             this.setParameter(key, "" + ids[i]);
         }
     }
-    
+
     public void removeTextureIDs(long... toRemoveIds)
-    {           
+    {
         long[] currentIDs = this.getTextureIDs();
-        
-        for(int i = 0; i < toRemoveIds.length; i++)
+
+        for (int i = 0; i < toRemoveIds.length; i++)
         {
             long rID = toRemoveIds[i];
-            for(int j = 0; j < currentIDs.length; j++)
+            for (int j = 0; j < currentIDs.length; j++)
             {
                 currentIDs[j] = currentIDs[j] == rID ? 0 : currentIDs[j]; //replace with a 0 if it does not exist
             }
         }
-        
+
         this.setTextureIDs(currentIDs);
     }
-    
+
     /**
      * Adds the given texture IDs to this volume mapping
-     * @param ids 
+     *
+     * @param ids
      */
     public void addTextureIDs(long... ids)
     {
-     
-        //Get the starting texture ID        
+        java.util.HashSet<Long> existingIDs = new java.util.HashSet<>();
+
         int num = 0;
         while (true)
         {
-            String key = "TEXTURE_ID_" + num;
-            long id = this.getLongParameter(key);
+            long id = this.getLongParameter("TEXTURE_ID_" + num);
             if (id <= 0)
             {
                 break;
             }
 
-            num++; //move to the next
+            existingIDs.add(id);
+            num++;
         }
 
-        for (int i = 0; i < ids.length; i++)
+        for (long id : ids)
         {
-            if(ids[i] == 0)
+            if (id <= 0 || !existingIDs.add(id))
+            {
                 continue;
-            
-            String key = "TEXTURE_ID_" + (num++);
-            this.setParameter(key, "" + ids[i]);
+            }
+
+            this.setParameter("TEXTURE_ID_" + num++, Long.toString(id));
         }
     }
 
     /**
      * Returns a list of textures that are mapped by this volume
-     */ 
+     */
     public long[] getTextureIDs()
     {
         int num = 0;
@@ -366,5 +378,5 @@ public class ONEVolume extends ONEObject
 
         return (rArray);
     }
-    
+
 } //end of ONEVolume class
