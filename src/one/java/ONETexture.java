@@ -18,6 +18,12 @@ import one.java.voxels.ONEVoxel;
 public class ONETexture extends ONEObject
 {
 
+    @Override
+    public long[] getChildIDs()
+    {
+        return(new long[0]); //textures do not get children
+    }
+
     public enum ONE_TEXTURE_TYPE
     {
         RGBA_BYTE, RGBA_FLOAT

@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import one.java.ONEDefaultScene;
+import one.java.ONEGroup;
+import one.java.ONEObject;
 import one.java.ONEParameter;
 import one.java.ONEScene;
 import static one.java.ONEScene.ONE_ID;
@@ -203,6 +205,16 @@ public class ONEFileWriter
                 this.write(texture, raf);
             }
         }
+        
+        //Groups
+        {
+            raf.writeInt(scene.getGroups().size());
+            for (int i = 0; i < scene.getGroups().size(); i++)
+            {
+                ONEGroup group = scene.getGroups().get(i);
+                this.write(group, raf);
+            }
+        }
 
         //Write out the length of the header
         long headerLength = raf.getFilePointer() - headerStart;
@@ -218,24 +230,11 @@ public class ONEFileWriter
      * @param scene
      * @param bStream
      */
-    private void write(ONEVolume volume, RandomAccessFile raf) throws Exception
+    private void write(ONEObject obj, RandomAccessFile raf) throws Exception
     {
-        raf.writeLong(volume.getID());
-        raf.writeUTF(volume.getName());
-        this.writeParameters(raf, volume.getParameters());
-    }
-
-    /**
-     * Read the next texture from the stream.
-     *
-     * @param scene
-     * @param bStream
-     */
-    private void write(ONETexture texture, RandomAccessFile raf) throws Exception
-    {
-        raf.writeLong(texture.getID());
-        raf.writeUTF(texture.getName());
-        this.writeParameters(raf, texture.getParameters());
+        raf.writeLong(obj.getID());
+        raf.writeUTF(obj.getName());
+        this.writeParameters(raf, obj.getParameters());
     }
     
      /**

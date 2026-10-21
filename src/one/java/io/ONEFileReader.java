@@ -10,6 +10,8 @@ import java.io.FileInputStream;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import one.java.ONEDefaultScene;
+import one.java.ONEGroup;
+import one.java.ONEObject;
 import one.java.ONEParameter;
 import one.java.ONEScene;
 import static one.java.ONEScene.ONE_ID;
@@ -75,7 +77,7 @@ public class ONEFileReader
             try
             {
                 stream = new BufferedInputStream(new FileInputStream(filename));
-                for(int i = 0; i < scene.getTextures().size(); i++)                
+                for (int i = 0; i < scene.getTextures().size(); i++)
                 {
                     this.readNextTexture(scene, false, stream);
                     task.addCurentSteps(1);
@@ -250,7 +252,7 @@ public class ONEFileReader
 
         try
         {
-            raf = new RandomAccessFile(filename, "r");          
+            raf = new RandomAccessFile(filename, "r");
             raf.seek(headerStart);
             this.readHeader(scene, raf);
         }
@@ -282,9 +284,11 @@ public class ONEFileReader
         //Read in the parameters for the scene
         scene.copyParameters(this.readParameters(raf));
 
+         ArrayList<ONEGroup> currentGroups = new ArrayList<>(scene.getGroups());
         ArrayList<ONEVolume> currentVolumes = new ArrayList<>(scene.getVolumes());
         ArrayList<ONETexture> currentTextures = new ArrayList<>(scene.getTextures());
 
+        ArrayList<ONEGroup> newGroups = new ArrayList<>();
         ArrayList<ONEVolume> newVolumes = new ArrayList<>();
         ArrayList<ONETexture> newTextures = new ArrayList<>();
 
@@ -310,6 +314,20 @@ public class ONEFileReader
             }
         }
 
+        if (version >= 2)
+        {
+            //GROUPS
+            {
+                int numGroups = raf.readInt();
+                for (int i = 0; i < numGroups; i++)
+                {
+                    ONEGroup group = scene.newGroup();
+                    this.read(group, raf, version);
+                    newGroups.add(group);
+                }
+            }
+        }
+
         //Purge our current list
         for (int i = 0; i < currentVolumes.size(); i++)
         {
@@ -328,6 +346,15 @@ public class ONEFileReader
                 scene.remove(cTexture);
             }
         }
+        
+        for (int i = 0; i < currentGroups.size(); i++)
+        {
+            ONEGroup cGroup = currentGroups.get(i);
+            if (!newGroups.contains(cGroup))
+            {
+                scene.remove(cGroup);
+            }
+        }
 
         //Now set the new ones
         for (int i = 0; i < newVolumes.size(); i++)
@@ -338,6 +365,11 @@ public class ONEFileReader
         for (int i = 0; i < newTextures.size(); i++)
         {
             scene.add(newTextures.get(i));
+        }
+        
+        for (int i = 0; i < newGroups.size(); i++)
+        {
+            scene.add(newGroups.get(i));
         }
     }
 
@@ -371,7 +403,10 @@ public class ONEFileReader
             String[] s = pair.split(":", 2);
             if (s.length != 2)
             {
-                s = new String[]{s[0], ""};
+                s = new String[]
+                {
+                    s[0], ""
+                };
             }
 
             ONEParameter param = new ONEParameter(s[0], s[1]);
@@ -387,28 +422,13 @@ public class ONEFileReader
      * @param scene
      * @param bStream
      */
-    private void read(ONEVolume volume, RandomAccessFile raf, int version) throws Exception
+    private void read(ONEObject obj, RandomAccessFile raf, int version) throws Exception
     {
-        volume.setID(raf.readLong());
-        volume.setName(raf.readUTF());
-        volume.getParameters().clear();
-        volume.getParameters().addAll(this.readParameters(raf));
-        volume.clean();
-    }
-
-    /**
-     * Read the next texture from the stream.
-     *
-     * @param scene
-     * @param bStream
-     */
-    private void read(ONETexture texture, RandomAccessFile raf, int version) throws Exception
-    {
-        texture.setID(raf.readLong());
-        texture.setName(raf.readUTF());
-        texture.getParameters().clear();
-        texture.getParameters().addAll(this.readParameters(raf));
-        texture.clean();
+        obj.setID(raf.readLong());
+        obj.setName(raf.readUTF());
+        obj.getParameters().clear();
+        obj.getParameters().addAll(this.readParameters(raf));
+        obj.clean();
     }
 
     /**

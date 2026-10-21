@@ -304,7 +304,7 @@ public class ONEVolume extends ONEObject
 
     public void removeTextureIDs(long... toRemoveIds)
     {
-        long[] currentIDs = this.getTextureIDs();
+        long[] currentIDs = this.getChildIDs();
 
         for (int i = 0; i < toRemoveIds.length; i++)
         {
@@ -354,7 +354,7 @@ public class ONEVolume extends ONEObject
     /**
      * Returns a list of textures that are mapped by this volume
      */
-    public long[] getTextureIDs()
+    public long[] getChildIDs()
     {
         int num = 0;
 

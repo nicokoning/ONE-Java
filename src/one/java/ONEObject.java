@@ -49,6 +49,11 @@ public abstract class ONEObject implements Serializable
     {
         return (ONEObject) ObjectSerializer.deepCopy(this);
     }
+    
+    /**
+     * Returns a list of all the direct children of this object
+     */ 
+    public abstract long[] getChildIDs();
 
     private void initializeTransient()
     {
