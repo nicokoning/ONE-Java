@@ -479,7 +479,7 @@ public class ONETexture extends ONEObject
         {
             return;
         }
-
+        
         //If this is a data voxel, set the number of parameters in the texture header
         ONEVoxel v = this.voxelList.get(0);
         if (v instanceof ONEDataVoxel)
